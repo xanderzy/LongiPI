@@ -1,0 +1,48 @@
+﻿@model LoginViewModel
+@{
+    ViewData["Title"] = "用户登陆";
+}
+<div class="layui-container fly-marginTop">
+    <div class="fly-panel fly-panel-user" pad20>
+        <div class="layui-tab layui-tab-brief" lay-filter="user">
+            <ul class="layui-tab-title">
+                <li class="layui-this">登入</li>
+                <li>注册</li>
+            </ul>
+            <div class="layui-form layui-tab-content" id="loginlay" style="padding: 20px 0;">
+                <div class="layui-tab-item layui-show">
+                    <div class="layui-form layui-form-pane">
+                        <form method="post" asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewBag.ReturnUrl">
+                            <div asp-validation-summary="All" class="text-danger"></div>
+                            <div class="layui-form-item">
+                                <label for="LayerUserName" class="layui-form-label">用户名:</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="LayerUserName" asp-for="UserName" required lay-verify="required" autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label for="L_pass" class="layui-form-label">密码</label>
+                                <div class="layui-input-inline">
+                                    <input type="password" id="L_pass" asp-for="Password" required lay-verify="required" autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <button class="layui-btn" lay-filter="*" lay-submit>立即登录</button>
+                                <span style="padding-left:20px;">
+                                    <input type="checkbox"  title="记住登录状态" asp-for="RememberMe">
+                                </span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="layui-tab-item" style="padding: 20px 0;">
+                    <blockquote class="layui-elem-quote">
+                        如若您是第一次登陆系统，请点击链接查询输入您的姓名查询在系统内是否存在账号—<a asp-controller="Home" asp-action="UserInfoReport"><cite style="color:blue">用户查询报表</cite></a>
+                        <p>无账号信息，请联系管理员申请账号注册。（KK-吕涛）</p>
+                    </blockquote>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+

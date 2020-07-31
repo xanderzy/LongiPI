@@ -1,0 +1,476 @@
+﻿@inject UserServices services
+@{
+     
+    var user = await services.User;
+}
+
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md3">
+            <div class="layui-card" style="padding:10px">
+                <div class="layui-row layui-col-space15" style="height:660px">
+                    <div class="layui-form" lay-filter="topicform">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">提案类别</label>
+                            <div class="layui-input-block">
+                                <select lay-verify="required" id="topicnode">
+                                    <option></option>
+                                    <option value="2">管理类</option>
+                                    <option value="3">技术类</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">是否完成</label>
+                            <div class="layui-input-block">
+                                <select lay-verify="required" id="topicisok">
+                                    <option value="2">未实施</option>
+                                    <option value="3">已完成</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">实施部门</label>
+                            <div class="layui-input-block">
+                                <select lay-verify="required" id="suggestdep">
+                                    <option value="" selected></option>
+                                    <option value="技术部">技术部</option>
+                                    <option value="生产一组">生产一组</option>
+                                    <option value="生产二组">生产二组</option>
+                                    <option value="生产三组">生产三组</option>
+                                    <option value="设备部">设备部</option>
+                                    <option value="动力部">动力部</option>
+                                    <option value="质量部">质量部</option>
+                                    <option value="计划物控部">计划物控部</option>
+                                    <option value="人力资源部">人力资源部</option>
+                                    <option value="采购履行部">采购履行部</option>
+                                    <option value="IE运营部">IE运营部</option>
+                                    <option value="仓储物流部">仓储物流部</option>
+                                    <option value="财务部">财务部</option>
+                                    <option value="总经理办公室">总经理办公室</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-form">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">实施人</label>
+                            <div class="layui-input-block">
+                                <input type="text" value="" class="layui-input" id="suggestuser" placeholder="请输入实施人姓名">
+                            </div>
+                        </div>
+                    </div>
+                    <blockquote class="layui-elem-quote">已完成状态的提案，请在上方填入实施人姓名并按下enter</blockquote>
+                    <div>
+                        <table id="truserTable" lay-filter="truserTable"></table>
+                        <script type="text/html" id="truserTable-tool">
+                            <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="truserdel">删除</a>
+                        </script>
+                    </div>
+                    <div>
+                        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+                            <legend>文件上传</legend>
+                        </fieldset>
+                        <div class="fly-panel">
+                            <div class="layui-upload-drag" id="uploadfile">
+                                <i class="layui-icon layui-icon-upload-drag"></i>
+                                <p>点击上传，或将文件拖拽到此处</p>
+                            </div>
+                            <div id="statusaera" style="text-align:center">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md9">
+            <div class="layui-card" style="padding:10px">
+                <div class="layui-form">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">标题</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="title" lay-verify="required" placeholder="请输入标题" autocomplete="off" class="layui-input" id="topictitle">
+                        </div>
+                    </div>
+                    <div class="layui-form-item" style="display:none">
+                        <label class="layui-form-label">附件ID</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="file" class="layui-input" id="fileid" value="0">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">提案内容</label>
+                        <div class="layui-input-block">
+                            <div id="wangeditor11" class="w-e-text-container">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-form-item" style="margin-top:30px">
+                        <label class="layui-form-label">建议改善</label>
+                        <div class="layui-input-block">
+                            <div id="wangeditor22" class="w-e-text-container">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-form-item" style="margin-top:60px">
+                        <div class="layui-input-block">
+                            <input type="button" class="layui-btn" value="发布提案" id="submittopic" data-username="@user.UserName">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script src="~/js/wangEditor.min.js"></script>
+    <script>
+        var custconfig = [
+            'head',  // 标题
+            'bold',  // 粗体
+            'fontSize',  // 字号
+            'fontName',  // 字体
+            'backColor',  // 背景颜色
+            'italic',  // 斜体
+            'underline',  // 下划线
+            'strikeThrough',  // 删除线
+            'foreColor',  // 文字颜色
+            'justify',  // 对齐方式
+            'table', // 表格
+            'image'  // 插入图片
+        ];
+        var E = window.wangEditor
+        var editor1 = new E('#wangeditor11')
+        editor1.customConfig.menus = custconfig
+        editor1.customConfig.pasteFilterStyle = true
+        editor1.customConfig.pasteTextHandle = function (content) {
+            // content 即粘贴过来的内容（html 或 纯文本），可进行自定义处理然后返回
+            if (content == '' && !content) return ''
+            var str = content
+            str = str.replace(/<xml>[\s\S]*?<\/xml>/ig, '')
+            str = str.replace(/<style>[\s\S]*?<\/style>/ig, '')
+            str = str.replace(/<\/?[^>]*>/g, '')
+            str = str.replace(/[ | ]*\n/g, '\n')
+            str = str.replace(/&nbsp;/ig, '')
+            return str
+        }
+        editor1.customConfig.pasteIgnoreImg = true
+        editor1.customConfig.uploadImgServer = '/Tool/FileUpload/'; //设置上传文件的服务器路径
+        editor1.customConfig.uploadImgParams = {
+            uploadtype: 'P',
+            tid: 0
+        }
+        editor1.customConfig.uploadImgMaxSize = 4 * 1024 * 1024; // 将图片大小限制为 3M
+        //自定义上传图片事件
+        editor1.customConfig.uploadImgHooks = {
+            before: function (xhr, editor, files) {
+
+            },
+            success: function (xhr, editor, result) {
+                var kk = $("#fileid").val();
+                kk = kk == "0" ? result.Fid : kk + "," + result.Fid;
+                $("#fileid").val(kk);
+            },
+            fail: function (xhr, editor, result) {
+                layer.alert('图片插入失败');
+            },
+            error: function (xhr, editor) {
+                layer.alert("上传图片异常！");
+            },
+            timeout: function (xhr, editor) {
+                layer.alert("上传超时！")
+            }
+        }
+        editor1.customConfig.zIndex = 1
+        editor1.create();
+
+        var editor2 = new E('#wangeditor22');
+        editor2.customConfig.pasteIgnoreImg = true;
+        editor2.customConfig.pasteFilterStyle = true
+        editor2.customConfig.pasteTextHandle = function (content) {
+            // content 即粘贴过来的内容（html 或 纯文本），可进行自定义处理然后返回
+            if (content == '' && !content) return ''
+            var str = content
+            str = str.replace(/<xml>[\s\S]*?<\/xml>/ig, '')
+            str = str.replace(/<style>[\s\S]*?<\/style>/ig, '')
+            str = str.replace(/<\/?[^>]*>/g, '')
+            str = str.replace(/[ | ]*\n/g, '\n')
+            str = str.replace(/&nbsp;/ig, '')
+            return str
+        }
+        editor2.customConfig.zIndex = 1;
+        custconfig.splice(11, 1);
+        editor2.customConfig.menus = custconfig;
+        editor2.create();
+    </script>
+    <script>
+        var $ = layui.$;
+        var upload = layui.upload;
+        var form = layui.form;
+        var layer = layui.layer;
+        var table = layui.table;
+
+        form.render(null, 'topicform');
+
+        //建议实施人表格
+        var tableIns = table.render({
+            elem: '#truserTable',
+            data: [],
+            limit: 60,
+            cols: [
+                [{
+                    field: 'userid',
+                    title: '工号',
+                    width: '25%'
+                },
+                {
+                    field: 'realname',
+                    title: '姓名',
+                    width: '25%'
+                },
+                {
+                    field: 'userdep',
+                    title: '部门',
+                    width: '30%'
+                },
+                {
+                    toolbar: '#truserTable-tool',
+                    title: '操作',
+                    width: '20%',
+                    align: 'center'
+                }
+                ]
+            ]
+        });
+
+
+        var fileisexist = []
+        var isfileuploaded = "N"
+        //文件上传
+        upload.render({
+            elem: '#uploadfile'
+            , url: '/Tool/FileUpload'
+            , data: { uploadtype: 'F', tid: 0 }
+            , accept: 'file'
+            , before: function (obj) {
+                obj.preview(function (index, file, result) {
+                    if (fileisexist.length > 0) {
+                        if (fileisexist.indexOf(file.name) > -1) {
+                            layer.alert("同名文件上传，请更改文件名后上传")
+                            isfileuploaded = "Y"
+                            return false
+                        } else {
+                            isfileuploaded = "N"
+                            fileisexist.push(file.name)
+                        }
+                    } else {
+                        isfileuploaded = "N"
+                        fileisexist.push(file.name)
+                    }
+                })
+            }
+            , done: function (res, index, upload) {
+                if (res.Success) { //上传成功
+                    //将返回的ID赋值给fileid
+                    //如果是同名的，就不绑定了-好Low
+                    if (isfileuploaded == "N") {
+                        var tt = $("#fileid").val();
+                        tt = tt == "0" ? res.Fid : tt + "," + res.Fid;
+                        $("#fileid").val(tt);
+                        let showmsg = '<p id=' + index + '><span style="color:green">' + res.FName + '-上传成功</span> <a href="javascript:void(0)" onclick=delokfile("' + res.FName + '",' + res.Fid + ',' + index + ');><i class="layui-icon layui-icon-close-fill"></i> </a></p>'
+                        $("#statusaera").append(showmsg);
+                    }
+                } else {
+                    layer.alert(res.Errormsg);
+                }
+            }
+            , error: function (index, upload) {
+                layer.alert("上传失败请重新上传");
+            }
+        });
+
+        //文件删除
+        function delokfile(filename, fileid, indexid) {
+            layer.confirm('此文件已上传成功，确认删除么？', {
+                btn: ['确认', '取消'] //按钮
+            }, function (index) {
+                layer.close(index);
+                $.ajax({
+                    type: "POST",
+                    url: "/Tool/DeleteFile",
+                    data: { dfid: fileid, tid: 0 },
+                    success: function (data) {
+                        var dfoj = JSON.parse(data);
+                        if (dfoj.success) {
+                            var filearr = $("#fileid").val().split(",")
+                            for (var i = 0; i < filearr.length; i++) {
+                                if (filearr[i] == fileid) {
+                                    filearr.splice(i, 1);
+                                }
+                            }
+                            if (filearr.length > 0) {
+                                var newfileid = filearr.join(',')
+                                $("#fileid").val(newfileid)
+                            } else {
+                                $("#fileid").val(0)
+                            }
+                            //删除同名filename
+                            var filenameindex = fileisexist.indexOf(filename)
+                            fileisexist.splice(filenameindex, 1)
+                            $("#" + indexid + "-0").remove();
+                        } else {
+                            layer.alert(dfoj.exinfo)
+                        }
+                    }
+                });
+            }, function (index) {
+                layer.close(index);
+            });
+        }
+
+        //添加实施人
+        $("#suggestuser").keydown(function (event) {
+            if (event.keyCode == "13") {
+                var suv = $("#suggestuser").val();
+                if (suv == "") { layer.alert("请输入实施人姓名！"); return false; }
+                if ($("#topicisok").val() == "2") {
+                    layer.alert("未实施状态提案不能添加实施人！")
+                    return false;
+                }
+                var tableObj = tableIns;
+                var config = tableObj.config;
+                var dataTemp = config.data;
+
+                //获取接口数据
+                $.ajax({
+                    type: "GET",
+                    url: "/Tool/GetUserInfo",
+                    data: { realname: suv },
+                    success: function (data) {
+                        var resuser = JSON.parse(data);
+                        if (resuser.code == 0) {
+                            //添加数据进去
+
+                            dataTemp.push({
+                                'userid': resuser.data.UserName,
+                                'realname': resuser.data.RealName,
+                                'userdep': resuser.data.Department
+                            });
+                            tableIns = table.reload(config.id, $.extend(true, {
+                                // 更新数据
+                                data: dataTemp,
+                            }, {}));
+                            $("#suggestuser").val('');
+                        } else {
+                            layer.alert(resuser.msg)
+                        }
+                    }
+                })
+            }
+        })
+        //删除实施人
+        table.on('tool(truserTable)', function (data) {
+            if (data.event == 'truserdel') {
+                var tableObj = tableIns;
+                var config = tableObj.config;
+                var dataTemp = config.data;
+                var trElem = data.tr.first();
+                var index = trElem.data('index');
+                dataTemp.splice(index, 1);
+                tableIns = table.reload(config.id, $.extend(true, {
+                    data: dataTemp
+                }, {}));
+            }
+        });
+
+        //提交提案
+        $("#submittopic").on('click', function () {
+            if ($("#submittopic").attr('lock')) {
+                return false;
+            }
+            //获取所有数据
+            var tnode = $("#topicnode").val();
+            if (tnode == "") { layer.alert("请选择提案类别"); return false }
+            var ttitle = $("#topictitle").val();
+            if (ttitle == "") { layer.alert("标题不能为空"); return false }
+            var tcontent = editor1.txt.html();
+            if (tcontent == "") { layer.alert("提案内容不能为空"); return false }
+            var tsuggest = editor2.txt.html();
+            if (tsuggest == "") { layer.alert("改善建议不能为空"); return false }
+            var tisok = $("#topicisok").val();
+            if (tisok == "3") {
+                if ($("#fileid").val() == "0" || $("#fileid").val() == null) {
+                    layer.alert("提案在实施完成状态下，必须上传完结报告！");
+                    return false;
+                }
+            }
+            //获取实施人数据
+            var tableObj = tableIns;
+            var config = tableObj.config;
+            var dataTemp = config.data;
+            if ($("#suggestdep").val() != "" && tisok == "3") {
+                layer.alert("提案在实施完成状态下，不能选择实施部门");
+                return false;
+            }
+            if (dataTemp.length == 0 && tisok == "3") {
+                layer.alert("提案在实施完成状态下，必须添加实施人员");
+                return false;
+            }
+            if ($("#topicisok").val() == "2" && dataTemp.length != 0) {
+                layer.alert("未实施状态提案不能添加实施人！")
+                return false;
+            }
+            var trusers = "";
+            for (var x = 0; x < dataTemp.length; x++) {
+                trusers == "" ? trusers = dataTemp[x].userid : trusers = trusers + "," + dataTemp[x].userid;
+            }
+            $("#submittopic").attr('lock', 1);
+            //提交所有数据
+            $.ajax({
+                type: "POST",
+                url: "/Home/AddTopicNew",
+                data: {
+                    node: tnode,
+                    title: ttitle,
+                    content: tcontent,
+                    suggest: tsuggest,
+                    type: tisok,
+                    fileid: $("#fileid").val(),
+                    truser: trusers,
+                    sugdep: $("#suggestdep").val(),
+                    tusername:$("#submittopic").data("username")
+                        },
+                    success: function (data) {
+                    var resobj = JSON.parse(data);
+                    if (resobj.code == "0") {
+                        layer.msg(resobj.msg, {
+                            offset: '15px'
+                            , icon: 1
+                            , time: 1000
+                        }, function () {
+                            $("#submittopic").attr('lock', '');
+                            location.href = "/Home/Index";
+                        });
+                    } else {
+                        $("#submittopic").attr('lock', '');
+                        layer.alert(resobj.msg);
+                    }
+                }
+            });
+        })
+    </script>
+
+
+
+
+    <style type="text/css">
+        .toolbar {
+            border: 1px solid #ccc; /*设置下拉棒*/
+        }
+
+        .w-e-text-container {
+            height: 260px !important; /*!important是重点，因为原div是行内样式设置的高度300px*/
+        }
+    </style>
+}

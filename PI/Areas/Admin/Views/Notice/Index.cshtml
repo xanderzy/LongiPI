@@ -1,0 +1,111 @@
+﻿@{
+    ViewData["Title"] = "发布新提案";
+}
+@model Topic
+<div class="layui-container fly-marginTop">
+    <div class="fly-panel" pad20 style="padding-top: 5px;">
+        <div class="layui-form layui-form-pane">
+            <div class="layui-tab layui-tab-brief" lay-filter="user">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">发表公告</li>
+                </ul>
+                <div class="layui-form layui-tab-content" id="LAY_ucm" style="padding: 20px 0;">
+                    <div class="layui-tab-item layui-show">
+                        <form method="post" asp-controller="Notice" asp-action="AddNotice" asp-area="Admin">
+                            <div class="layui-row layui-col-space15 layui-form-item">
+                                <div class="layui-col-md3">
+                                    <label class="layui-form-label">公告类别</label>
+                                    <div class="layui-input-block">
+                                        <select lay-verify="required" asp-for="NodeId" lay-filter="column">
+                                            <option></option>
+                                            <option value="4">更新公告</option>
+                                            <option value="5">置顶公告</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-col-md9">
+                                    <label for="L_title" class="layui-form-label">标题</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" id="L_title" asp-for="Title" required lay-verify="required" autocomplete="off" class="layui-input">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item layui-form-text">
+                                <div id="wangeditor11" class="layui-input-block" style="height:320px">
+                                </div>
+                                <div style="display:none">
+                                    <textarea rows="10" asp-for="Content" id="editor11" required lay-verify="required"></textarea>
+                                </div>
+                            </div>
+                            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;"></fieldset>
+                            <div class="layui-form-item">
+                                <button class="layui-btn" lay-filter="*" lay-submit>立即发布</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script src="~/js/wangEditor.min.js"></script>
+    <script>
+        var E = window.wangEditor
+        var editor1 = new E('#wangeditor11')
+        var $text1 = $('#editor11')
+        editor1.customConfig.onchange = function (html) {
+            $text1.val(html);
+        }
+        editor1.customConfig.menus = [
+            'head',  // 标题
+            'bold',  // 粗体
+            'fontSize',  // 字号
+            'fontName',  // 字体
+            'italic',  // 斜体
+            'underline',  // 下划线
+            'strikeThrough',  // 删除线
+            'foreColor',  // 文字颜色
+            'justify',  // 对齐方式
+            'table', // 表格
+            'image'  // 插入图片
+        ]
+        editor1.customConfig.debug = true;
+        // 关闭粘贴内容中的样式
+        editor1.customConfig.pasteFilterStyle = false
+        // 忽略粘贴内容中的图片
+        editor1.customConfig.pasteIgnoreImg = true
+        // 使用 base64 保存图片
+        //editor.customConfig.uploadImgShowBase64 = true
+
+        // 上传图片到服务器
+        //editor1.customConfig.uploadFileName = 'myFile'; //设置文件上传的参数名称
+        editor1.customConfig.uploadImgServer = '/Home/ImgUpload/'; //设置上传文件的服务器路径
+        editor1.customConfig.uploadImgMaxSize = 4 * 1024 * 1024; // 将图片大小限制为 3M
+        //自定义上传图片事件
+        editor1.customConfig.uploadImgHooks = {
+            before: function (xhr, editor, files) {
+
+            },
+            success: function (xhr, editor, result) {
+                var bobo = $("#atcchfileid").val();
+                var cc = bobo == "0" ? result.pngid : bobo + "," + result.pngid;
+                $("#atcchfileid").val(cc);
+            },
+            fail: function (xhr, editor, result) {
+                layer.alert("上传图片异常！");
+            },
+            error: function (xhr, editor) {
+                layer.alert("上传图片异常！");
+            },
+            timeout: function (xhr, editor) {
+                layer.alert("上传超时！")
+            }
+        }
+        editor1.customConfig.zIndex = 1
+        editor1.create();
+    </script>
+}
+
+

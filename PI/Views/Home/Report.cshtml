@@ -1,0 +1,334 @@
+﻿
+<div class="fly-panel fly-panel-user" pad20>
+    <div class="layui-form" lay-filter="rsform">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">标题</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="txt_search_title" placeholder="请输入标题" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">提案人员</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="txt_search_username" placeholder="请输入提案人员姓名" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">提案部门</label>
+                <div class="layui-input-inline">
+                    <select name="tadepn" xm-select="tiandepxms"  id="txt_search_department" lay-verify="required"></select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">审核部门</label>
+                <div class="layui-input-inline">
+                    <select id="txt_search_acdepartment">
+                        <option value="" selected></option>
+                        <option value="技术部">技术部</option>
+                        <option value="生产一组">生产一组</option>
+                        <option value="生产二组">生产二组</option>
+                        <option value="生产三组">生产三组</option>
+                        <option value="设备部">设备部</option>
+                        <option value="动力部">动力部</option>
+                        <option value="质量部">质量部</option>
+                        <option value="计划物控部">计划物控部</option>
+                        <option value="人力资源部">人力资源部</option>
+                        <option value="采购履行部">采购履行部</option>
+                        <option value="IE运营部">IE运营部</option>
+                        <option value="仓储物流部">仓储物流部</option>
+                        <option value="财务部">财务部</option>
+                        <option value="总经理办公室">总经理办公室</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-inline">
+                    <select name="tastatusn" xm-select="tastatusxms" id="txt_search_status" lay-verify="required"></select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <div class="layui-input-inline" style="margin-left:36px">
+                    <select id="starttimeformat">
+                        <option value=0 selected></option>
+                        <option value=1>以提案创建时间区间查询</option>
+                        <option value=2>以提案通过时间区间查询</option>
+                        <option value=3>以提案完成时间区间查询</option>
+                    </select>
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="txt_search_startdate" placeholder="开始时间" autocomplete="off">
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="txt_search_enddate" placeholder="结束时间" autocomplete="off">
+                </div>
+            </div>
+            <div class="layui-inline layui-col-md-offset2">
+                <button class="layui-btn" id="btn_query" data-type="reload">查询</button>
+            </div>
+        </div>
+    </div>
+    <table id="pireport"></table>
+</div>
+
+@section Scripts{
+    <script>
+        layui.config({
+            base: '../../../js/'
+        }).extend({
+            formSelects: 'formSelects-v4'
+        }).use(['formSelects', 'layer', 'table', 'form'], function () {
+            var table = layui.table;
+            var form = layui.form;
+            var formSelects = layui.formSelects;
+
+            var currpar=1
+
+            table.render({
+                elem: '#pireport'
+                , url: '/Home/GetReport' //数据接口
+                , page: true
+                , loading: true
+                , toolbar: true //导出打印工具栏
+                , id: 'testReload'
+                 ,limit:10
+                , limits: [10,50,100, 200, 300,500]
+                , cols: [[ //表头
+                    { field: 'UserName', title: '工号', width: '6%' }
+                    , { field: 'RealName', title: '姓名', width: '6%' }
+                    , { field: 'Department', title: '部门', width: '6%' }
+                    , {
+                        field: 'Type', title: '状态', width: '6%', templet: function (d) {
+                            if (d.Type == 3) { return "管理员审核"; }
+                            if (d.Type == 2) { return "审核中"; }
+                            if (d.Type == 4) { return "实施中"; }
+                            if (d.Type == 5) { return "基地评分中"; }
+                            if (d.Type == 7) { return "总部评分中"; }
+                            if (d.Type == 6) { return "已完结"; }
+                            if (d.Type == 11) { return "已中止"; }
+                            if (d.Type == 0) { return "被驳回"; }
+                        }
+                    }
+                    , {
+                        field: 'NodeId', title: '类别', width: '6%', templet: function (d) {
+                            if (d.NodeId == 2) { return "管理类"; }
+                            if (d.NodeId == 3) { return "技术类"; }
+                        }
+                    }
+                    , {
+                        field: 'AcRealName', title: '审核人', width: '6%', templet: function (d) {
+                            if (d.AcRealName == null) { return "无"; }
+                            else { return d.AcRealName; }
+                        }
+                    }
+                    , {
+                        field: 'Acdepartment', title: '审核部门', width: '6%', templet: function (d) {
+                            if (d.Acdepartment == null) { return "无"; }
+                            else { return d.Acdepartment; }
+                        }
+                    }
+                    , {
+                        field: 'CreateOn', title: '发布日期', width: '8%', templet: function (d) {
+                            return TimeFormat(d.CreateOn)
+                        }
+                    }
+                    , {
+                        field: 'PassTime', title: '审核通过日期', width: '8%', templet: function (d) { return TimeFormat(d.PassTime) }
+                    }
+                    , {
+                        field: 'FinishTime', title: '完结日期', width: '8%', templet: function (d) { return TimeFormat(d.FinishTime) }
+                    }
+                    , {
+                        field: 'TopicMark', title: '基地得分', width: '7%', templet: function (d) {
+                            if (d.Type == 6||d.Type == 7) { return d.TopicMark }
+                            else {
+                                return "无"
+                            }
+                        }
+                    }
+                     , {
+                        field: 'ZongbuMark', title: '总部得分', width: '7%', templet: function (d) {
+                            if (d.ZongbuMark>0) { return d.ZongbuMark }
+                            else {
+                                return "无"
+                            }
+                        }
+                    }
+                    , {
+                        field: 'Title', title: '标题', width: '20%', templet: function (d) {
+                            return '<a href="/Topic/Index/' + d.Id + '"' + ' class="layui-table-link">' + d.Title + '</a>';
+                        }
+
+                    }
+                ]], done: function (res, curr, count) {
+                    sessionStorage.setItem("rcurrval", curr);
+                 }
+            });
+
+            window.onload = function () {
+                var localitem = window.sessionStorage.getItem("SearchInfo")
+                currpar = window.sessionStorage.getItem("rcurrval");
+                var whereval = {}
+                if (localitem != null&&localitem!= undefined) {
+                var mysearch = JSON.parse(window.sessionStorage.getItem("SearchInfo"));
+                $('#txt_search_username').val(mysearch.username);
+                $('#txt_search_title').val(mysearch.title);
+                formSelects.value('tiandepxms', mysearch.department);
+                $('#txt_search_acdepartment').val(mysearch.acdepartment);
+                $('#txt_search_startdate').val(mysearch.startdate);
+                formSelects.value('tastatusxms', mysearch.status);
+                $('#txt_search_enddate').val(mysearch.enddate);
+                $('#starttimeformat').val(mysearch.timef);
+                  form.render('select', 'rsform');
+                 whereval= {
+                            username: $('#txt_search_username').val(),
+                            title: $('#txt_search_title').val(),
+                            department:formSelects.value('tiandepxms', 'valStr'),
+                            acdepartment: $('#txt_search_acdepartment').val(),
+                            status: formSelects.value('tastatusxms', 'valStr'),
+                            startdate: $('#txt_search_startdate').val(),
+                            enddate: $('#txt_search_enddate').val(),
+                            setimef: $('#starttimeformat').val()
+                            }
+                }
+                
+                table.reload('testReload', {
+                            page: {
+                                curr:currpar
+                    }
+                    , where: whereval
+                    });
+            }; 
+
+            
+            $("#btn_query").on('click', function () {
+                    window.sessionStorage.clear();
+                    var tusername = $('#txt_search_username').val();
+                    var ttitle = $('#txt_search_title').val();
+                    //var tdepartment = $('#txt_search_department');
+                    var tacdepartment = $('#txt_search_acdepartment option:selected').val();
+                    //var tstatus = $('#txt_search_status');
+                    var tstartdate = $('#txt_search_startdate').val();
+                    var tendddte = $('#txt_search_enddate').val();
+                    var tesetimef = $('#starttimeformat option:selected').val();
+
+                    var searchstorage = new Object;
+                    searchstorage.username = tusername;
+                    searchstorage.title = ttitle;
+                    searchstorage.department = formSelects.value('tiandepxms', 'val');
+                    searchstorage.acdepartment = tacdepartment;
+                    searchstorage.status=formSelects.value('tastatusxms', 'val');
+                    searchstorage.startdate = tstartdate;
+                    searchstorage.enddate = tendddte;
+                    searchstorage.timef = tesetimef;
+                    var jsonVoucherStr = JSON.stringify(searchstorage);
+                    sessionStorage.setItem("SearchInfo", jsonVoucherStr);
+
+                    table.reload('testReload', {
+                            page: {
+                                curr:1
+                            }
+                            , where: {
+                            username: tusername,
+                            title: ttitle,
+                            department:formSelects.value('tiandepxms', 'valStr'),
+                            acdepartment: tacdepartment,
+                            status: formSelects.value('tastatusxms', 'valStr'),
+                            startdate: tstartdate,
+                            enddate: tendddte,
+                            setimef: tesetimef
+                        }
+                    });
+            });
+
+            function TimeFormat(nfmtime) {
+                if (nfmtime == null || nfmtime == "" || nfmtime == undefined) {
+                    return "无";
+                } else {
+                    var datet = new Date(nfmtime);
+                    var o = {
+                        "M+": datet.getMonth() + 1,                 //月份
+                        "d+": datet.getDate(),                    //日
+                        "h+": datet.getHours(),                   //小时
+                        "m+": datet.getMinutes(),                 //分
+                        "s+": datet.getSeconds(),                 //秒
+                        "q+": Math.floor((datet.getMonth() + 3) / 3), //季度
+                        "S": datet.getMilliseconds()             //毫秒
+                    };
+                    var fmt = "yyyy-MM-dd hh:mm:ss";
+                    if (/(y+)/.test(fmt))
+                        fmt = fmt.replace(RegExp.$1, (datet.getFullYear() + "").substr(4 - RegExp.$1.length));
+                    for (var k in o)
+                        if (new RegExp("(" + k + ")").test(fmt))
+                            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                    return fmt;
+                }
+            }
+
+            formSelects.render('tiandepxms', {
+                skin: "normal",                 //多选皮肤
+                height: "50px",                 //是否固定高度, 38px | auto
+                radio: false,                   //是否设置为单选模式
+                direction: "auto",
+                max: 3,                 //多选最多选择量           
+                searchType: "title",    //搜索框的位置            
+                showCount: 0,           //多选的label数量, 0,负值,非数字则显示全部
+            });
+            formSelects.data('tiandepxms', 'local', {
+                arr: [
+                    { "name": "技术部", "value": "技术部" },
+                    { "name": "生产一组", "value": "生产一组" },
+                    { "name": "生产二组", "value": "生产二组" },
+                    { "name": "生产三组", "value": "生产三组" },
+                    { "name": "设备部", "value": "设备部" },
+                    { "name": "动力部", "value": "动力部" },
+                    { "name": "质量部", "value": "质量部" },
+                    { "name": "计划物控部", "value": "计划物控部" },
+                    { "name": "人力资源部", "value": "人力资源部" },
+                    { "name": "采购履行部", "value": "采购履行部" },
+                    { "name": "IE运营部", "value": "IE运营部" },
+                    { "name": "仓储物流部", "value": "仓储物流部" },
+                    { "name": "财务部", "value": "财务部" },
+                    { "name": "总经理办公室", "value": "总经理办公室" }
+                ]
+            });
+
+            formSelects.render('tastatusxms', {
+                skin: "normal",                 //多选皮肤
+                height: "50px",                 //是否固定高度, 38px | auto
+                radio: false,                   //是否设置为单选模式
+                direction: "auto",
+                max: 3,                 //多选最多选择量           
+                searchType: "title",    //搜索框的位置            
+                showCount: 0,           //多选的label数量, 0,负值,非数字则显示全部
+            });
+            formSelects.data('tastatusxms', 'local', {
+                arr: [
+                    { "name": "审核中", "value": "2" },
+                    { "name": "管理员审核", "value": "3" },
+                    { "name": "实施中", "value": "4" },
+                    { "name": "基地评分中", "value": "5" },
+                    { "name": "总部评分中", "value": "7" },
+                    { "name": "已完结", "value": "6" },
+                    { "name": "被驳回", "value": "0" },
+                    { "name": "已中止", "value": "11" }
+                ]
+            });
+        });
+    </script>
+    <script>
+        var laydate = layui.laydate;
+        laydate.render({
+            elem: '#txt_search_startdate',
+            type: 'datetime'
+        });
+        laydate.render({
+            elem: '#txt_search_enddate',
+            type: 'datetime'
+        });
+    </script>
+}
+

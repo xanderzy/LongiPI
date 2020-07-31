@@ -1,0 +1,759 @@
+﻿@inject UserServices services
+@model Topic
+@{
+    ViewData["Title"] = Model.Title;
+    var list = ViewBag.Replys as List<TopicReply>;
+    var ffilelist = ViewBag.FFiles as List<MyFile>;
+    var wfilelist = ViewBag.WFiles as List<MyFile>;
+    //var runt = ViewBag.RUntNotice as List<NoticeViewModel>;
+    var user = await services.User;
+}
+
+<div class="layui-container">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md9 content detail">
+            <div class="fly-panel detail-box">
+                <h1 id="titleid" data-id="@Model.Id">@Model.Title</h1>
+                <div class="fly-detail-info">
+                    <span class="layui-badge layui-bg-orange fly-detail-column">@Model.Node.Name</span>
+                    @if (Model.Type == TopicType.Normal)
+                    {<span class="layui-badge layui-bg-gray">未审核</span>}
+                    @if (Model.Type == TopicType.Good)
+                    {<span class="layui-badge layui-bg-red">实施中</span>}
+                    @if (Model.Type == TopicType.Top)
+                    {<span class="layui-badge layui-bg-green">基地评分中</span>}
+                    @if (Model.Type == TopicType.Marking)
+                    {<span class="layui-badge layui-bg-green">总部评分中</span>}
+                    @if (Model.Type == TopicType.Perfect)
+                    {<span class="layui-badge layui-bg-green">已完结</span>}
+                    @if (Model.Type == TopicType.TeamLeaderCheck || Model.Type == TopicType.AdminCheck)
+                    {<span class="layui-badge layui-bg-blue" id="shenheren">审核中</span>}
+                    @if (Model.Type == TopicType.Delete)
+                    {<span class="layui-badge layui-bg-black">已驳回</span>}
+                    @if (Model.Type == TopicType.Perfect)
+                    {
+                        @if (Model.ZongbuMark > 0)
+                        {
+                            {<span class="layui-badge layui-bg-orange">@Model.ZongbuMark 分</span>}
+                    }
+                    else
+                    {
+                        {<span class="layui-badge layui-bg-orange">@Model.TopicMark 分</span>}
+                }
+
+                    }
+                    <span class="fly-list-nums">
+                        <a href="#comment"><i class="iconfont" title="改善人数">&#xe60c;</i>@Model.ReplyCount</a>
+                    </span>
+                </div>
+                <div class="detail-about">
+                    <a class="fly-avatar" href="#">
+                        <img src="~/images/longi.png" alt="隆基">
+                    </a>
+                    <div class="fly-detail-user">
+                        <a href="#" class="fly-link">
+                            <cite>@Model.UserName-@Model.User.RealName</cite>
+                            <i class="layui-badge fly-badge-vip">@Model.User.Department</i>
+                        </a>
+                    </div>
+                    <div class="detail-hits">
+                        <span>@Model.CreateOn</span>
+                    </div>
+                </div>
+
+                <div class="detail-body" id="imgcontent">
+                    <h3 style="color:gray">提案背景</h3> <hr>
+                    @Html.Raw(Model.Content)
+                    <p></p>
+                    <h3 style="color:gray">建议改善</h3> <hr>
+                    @Html.Raw(Model.Suggest)
+                    <p></p>
+                    @if (Model.HasUpload != "0")
+                    {
+                        if (ffilelist.Count > 0)
+                        {
+                            <h3 style="color:gray">提案附件</h3><hr>
+                            @for (int i = 0; i < ffilelist.Count; i++)
+                            {
+                                var ffile = ffilelist[i];
+                                <p><i class="layui-icon layui-icon-link"></i><a asp-controller="Tool" asp-action="DownLoad" asp-route-fiid="@ffile.Id">@ffile.FileName@ffile.FileExt</a></p>
+                            }
+                        }
+                        if (wfilelist.Count > 0)
+                        {
+                            <h3 style="color:gray">完结报告</h3> <hr>
+                            @for (int i = 0; i < wfilelist.Count; i++)
+                            {
+                                var wfile = wfilelist[i];
+                                <p id="{{ @wfile.Id+'file'}}">
+                                    <i class="layui-icon layui-icon-link"></i><a asp-controller="Tool" asp-action="DownLoad" asp-route-fiid="@wfile.Id">@wfile.FileName@wfile.FileExt</a>
+                                    @if (user != null)
+                                    {
+                                        @if (user.UserName == "admin")
+                                        {
+                                            <a href="javascript:void(0)" onclick="delokfile(@wfile.Id,@Model.Id)">
+                                                <i class="layui-icon layui-icon-delete" style="font-size: 30px; color: #1E9FFF;"></i>
+                                            </a>
+                                        }
+                                    }
+                                </p>
+                            }
+                        }
+                    }
+                </div>
+                <!--<div id="outerdiv" style="position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:2;width:100%;height:100%;display:none;">
+                <div id="innerdiv" style="position:absolute;">
+                <img id="bigimg" style="border:5px solid #fff;" src="" />
+                </div>
+                </div>-->
+            </div>
+
+
+            <!--<div class="fly-panel detail-box" id="process" style="display:none">
+        <div class="layui-collapse">
+            <div class="layui-colla-item">
+                <h2 class="layui-colla-title">提案流程数据</h2>
+                <div class="layui-colla-content">
+                    <section id="timeline" class="timeline-outer">
+                        <div class="container" id="timelinecontent">
+                            <div class="row">
+                                <div class="col s12 m12 l12">
+                                    <ul class="timeline" id="ulvalue">
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>-->
+
+            @if (user != null)
+            {
+                if (user.UserName != "admin")
+                {
+                    @if (Model.Type == TopicType.Good)
+                    {
+                        @for (int i = 0; i < list.Count; i++)
+                        {
+                            var item = list[i];
+                            @if (user.UserName == item.ReplyUserName)
+                            {
+                                <div class="fly-panel detail-box">
+                                    <h3 style="color:gray">添加实施人</h3><hr>
+                                    <div class="layui-form">
+                                        <div class="layui-form-item">
+                                            <div class="layui-inline">
+                                                <input type="text" id="newtruseradd" placeholder="输入实施人姓名" autocomplete="off" class="layui-input">
+                                            </div>
+                                            <div class="layui-inline">
+                                                <button class="layui-btn" id="addnewtrbtn" data-id="@Model.Id" data-transby="@user.UserName">添加人员</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="fly-panel detail-box">
+                                    <h3 style="color:gray">完结提案</h3><hr>
+                                    <div class="layui-upload">
+                                        <div class="fly-panel">
+                                            <div class="layui-upload-drag" id="uploadfile">
+                                                <i class="layui-icon layui-icon-upload-drag"></i>
+                                                <p>点击上传，或将文件拖拽到此处</p>
+                                            </div>
+                                            <div id="statusaera">
+
+                                            </div>
+                                        </div>
+                                        <button type="button" class="layui-btn" id="finishta"  data-fileid="0" data-delrid="0" data-delusername="">完结提案</button>
+                                        <input type="button" class="layui-btn layui-btn-warm" id="breakta" data-id="@Model.Id" data-transby="@user.UserName" value="中止提案">
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+                }
+            }
+
+
+        <div class="fly-panel detail-box">
+            <table id="processlog" lay-filter="processlog"></table>
+        </div>
+
+
+
+         @if (list.Count() > 0 && Model.Type != TopicType.TeamLeaderCheck)
+        {
+            <div class="fly-panel detail-box" id="flyReply">
+                <fieldset class="layui-elem-field layui-field-title" style="text-align: center;">
+                    @if (Model.Type == TopicType.Delete)
+                    {<legend>驳回理由</legend> }
+                    else if (Model.Type == TopicType.Breakup)
+                    {<legend>中止理由</legend>}
+                    else
+                    {<legend>改善人员</legend>}
+                </fieldset>
+
+                <ul class="jieda" id="jieda">
+                    @for (int i = 0; i < list.Count; i++)
+                    {
+                        var item = list[i];
+                        <li data-id="111" class="jieda-daan">
+                            <a name="item-4444"></a>
+                            <div class="detail-about detail-about-reply">
+                                <a class="fly-avatar" href="">
+                                    <img src="~/images/longi.png" alt="隆基">
+                                </a>
+                                <div class="fly-detail-user">
+                                    <a href="" class="fly-link">
+                                        <cite>@item.ReplyUser.UserName-@item.ReplyUser.RealName</cite>
+                                        <i class="iconfont icon-renzheng"></i>
+                                        <i class="layui-badge fly-badge-vip">@item.ReplyUser.Department</i>
+                                    </a>
+                                </div>
+                                <div class="detail-hits">
+                                    <span>@item.CreateOn</span>
+                                </div>
+                            </div>
+                            <div class="detail-body jieda-body photos">
+                                @Html.Raw(item.ReplyContent)
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        } 
+            </div>
+            <div class="layui-col-md3">
+                <div class="fly-panel">
+                    <div class="fly-panel-title">
+                        提案改善系统文档
+                    </div>
+                    <div class="fly-panel-main">
+                        <a href="~/shouce/提案改善系统操作手册.pptx" target="_blank" class="fly-zanzhu" style="background-color: #5FB878;">系统操作手册下载</a>
+                        <a href="~/shouce/项目结案报告.docx" target="_blank" class="fly-zanzhu" style="background-color: #5FB878;">提案改善完结报告模板-WORD版</a>
+                        <a href="~/shouce/管理类提案改善报告模板.pptx" target="_blank" class="fly-zanzhu" style="background-color: #5FB878;">提案改善完结报告模板管理类-PPT版</a>
+                        <a href="~/shouce/技术类提案改善报告模板.pptx" target="_blank" class="fly-zanzhu" style="background-color: #5FB878;">提案改善完结报告模板技术类-PPT版</a>
+                    </div>
+                </div>
+                <div class="fly-panel" style="padding: 20px 0; text-align: center;">
+                    <img src="~/images/xiaochengxu.png" style="max-width: 100%;" alt="提案改善">
+                    <p style="position: relative; color: #666;">提案改善微信小程序码-扫码进入</p>
+                </div>
+            </div>
+        </div>
+</div>
+
+@section scripts{
+    <script>
+        var element = layui.element;
+        var upload = layui.upload;
+        var layer = layui.layer;
+        var table = layui.table;
+        var $ = layui.$
+
+        //提案的ID
+        var ftid = $("#titleid").data("id");
+        var bohuiren=''
+
+
+         var tableIns = table.render({
+            elem: '#processlog'
+            , page: false 
+            , url: '/Topic/GetStatusLog' //数据接口
+             , id: 'myprocesstable'
+             , where: {slid:ftid}
+             , cols: [[ //表头
+                 {
+                     field: 'Jiedian', title: '操作类型', width: '15%', templet: function (d) {
+                          if (d.TransName=="CreateTopic") { return "发布提案" }
+                          if (d.TransName== "PassTL") { return "提案审核通过" }
+                          if (d.TransName=="FinishTopic") { return "完结提案" }
+                          if (d.TransName=="JiMark") { return "基地评分" }
+                          if (d.TransName=="ZonbugMark") { return "总部评分" }
+                          if (d.TransName=="BohuiMark") { return "总部驳回基地评分" }
+                          if (d.TransName=="ChangeTL") { return "转办提案" }
+                          if (d.TransName=="HideTopic") { return "驳回提案" }
+                         if (d.TransName == "AddNewRUser") { return "添加实施人" }
+                           if (d.TransName=="DeleteRuser") { return "删除实施人" }
+                          if (d.TransName=="BreakTL") { return "中止提案" }
+                          if (d.TransName=="Chehui") { return "提案撤回" }
+                    }
+                 },
+                 {
+                     field: 'TransDate', title: '操作日期', width: '20%',
+                     templet: function (d) {
+                         return d.TransDate.substr(0,16)
+                     }
+                    
+                 },
+                 { field: 'RealName', title: '操作人', width: '15%' },
+                 {
+                     field: 'Msg', title: '详细信息', width: '50%',
+                     templet: function (d) {
+                         if (d.TransName == "CreateTopic") {
+                             bohuiren = d.Attr2
+                             $("#shenheren").html('审核中:'+bohuiren)
+                             return d.RealName + "发布了提案,现由" + d.Attr2 + "进行审核"
+                         }
+                          if (d.TransName== "PassTL") { return d.RealName+"审核通过提案，添加了实施人:"+d.Attr2}
+                          if (d.TransName=="FinishTopic") { return d.RealName+"完结了提案" }
+                          if (d.TransName=="JiMark") { return "此提案基地评分为:" +d.Attr2}
+                          if (d.TransName=="ZonbugMark") { return "此提案基地评分为"+d.Attr2}
+                          if (d.TransName == "BohuiMark") { return "此提案被总部驳回，基地重新评分为:" + d.Attr2 }
+                         if (d.TransName == "ChangeTL") {
+                               bohuiren = d.Attr2
+                             $("#shenheren").html('审核中:'+bohuiren)
+                             return d.RealName + "将提案转办给了" + d.Attr2
+                         }
+                          if (d.TransName=="HideTopic") { return bohuiren+"驳回了提案,驳回理由:"+d.Attr2}
+                          if (d.TransName == "AddNewRUser") { return d.RealName + "添加了新的实施人:" + d.Attr2 }
+                          if (d.TransName=="DeleteRuser") { return d.RealName + "删除了实施人:" + d.Attr2 }
+                          if (d.TransName == "BreakTL") { return d.RealName + "中止了提案，中止原因:" + d.Attr2 }
+                          if (d.TransName == "Chehui") { return d.RealName + "将提案撤回实施状态，撤回原因:" + d.Attr2 }
+                    }
+                  }
+            ]]
+        });
+
+        //整个页面加载完成后获取数据
+        /*window.onload = function () {
+            //显示流程数据
+            $.ajax({
+                type: "POST",
+                url: "/Topic/GetStatusLog",
+                data: { slid: ftid },
+                success: function (data) {
+                    var roj = JSON.parse(data);
+                    if (roj.success) {
+                        /*for (var j = 0; j < roj.data.length; j++) {
+                            var transname = ""
+                            switch (roj.data[j].TransName) {
+                                case "CreateTopic": transname = "发布提案"; break;
+                                case "ChangeTL": transname = "转办提案"; break;
+                                case "PassTL": transname = "通过提案"; break;
+                                case "FinishTopic": transname = "完结提案"; break;
+                            }
+                            var lihtml = '<li class="event" data-date=' + roj.data[j].TransDate.substr(0, 10) + '>' +
+                                '<h3>' + roj.data[j].RealName + transname + '</h3>' +
+                                '</li>'
+                            $("#ulvalue").append(lihtml);
+                            $("#process").css("display", "block");
+                        }
+                    } else {
+                        layer.alert(roj.msg);
+                    }
+                }
+            })
+        }*/
+
+
+
+        //上传完结报告
+        upload.render({
+            elem: '#uploadfile'
+            , url: '/Tool/FileUpload'
+            , data: { uploadtype: 'W', tid: 0 }
+            , accept: 'file'
+            , done: function (res, index, upload) {
+                if (res.Success) { //上传成功
+                    var btnfid = $("#finishta").data("fileid");
+                    btnfid = btnfid == "0" ? res.Fid : btnfid + "," + res.Fid;
+                    $("#finishta").data("fileid", btnfid);
+                    let showmsg = `<p id=${index}><span style="color:green"> ${res.FName}-上传成功</span> <a href="javascript:void(0)" onclick="delokfile(${res.Fid},${index})"><i class="layui-icon layui-icon-close-fill"></i> </a></p>`
+                    $("#statusaera").append(showmsg);
+                } else {
+                    layer.alert(res.Errormsg);
+                }
+            }
+            , error: function (index, upload) {
+                layer.alert("上传失败请重新上传");
+            }
+        });
+
+        //完结提案
+        $("#finishta").on('click', function () {
+            var fid = $("#breakta").data("id");
+            //跳出是否这些实施人
+            $.ajax({
+                type: "POST",
+                url: "/Topic/ReplyUserInfo",
+                data: { id: fid },
+                success: function (data) {
+                    var allrobj = JSON.parse(data);
+                    if (allrobj.success) {
+                        //弹出人员弹框
+                        var showallru =
+                            '<div style="padding:20px"><blockquote class="layui-elem-quote">请核对实施人员，多余的实施人员请删除，少的实施人员请在提案页面中添加</blockquote>' +
+                            '<table class="layui-table">' +
+                            '<colgroup>' +
+                            '<col width="30%">' +
+                            '<col width="30%">' +
+                            '<col width="30%">' +
+                            '<col width="10%">' +
+                            '</colgroup>' +
+                            '<thead id="tablebody">' +
+                            '<tr>' +
+                            '<th>工号</th>' +
+                            '<th>姓名</th>' +
+                            '<th>部门</th>' +
+                            '<th>操作</th>' +
+                            '</tr> ' +
+                            '</thead>' +
+                            '<tbody>';
+                        for (var i = 0; i < allrobj.data.length; i++) {
+                            var showrow = '<tr id="rurow' + i + '">' +
+                                '<td>' + allrobj.data[i].username + '</td>' +
+                                '<td>' + allrobj.data[i].realname + '</td>' +
+                                '<td>' + allrobj.data[i].dep + '</td>' +
+                                '<td><button type="button" class="layui-btn layui-btn-danger" onclick=deluser("' + allrobj.data[i].realname + '",' + allrobj.data[i].rid + ',' + '0);>删除</button></td>'
+                            ' </tr>'
+
+                            showallru += showrow
+                        }
+                        showallru = showallru + '</tbody></table></div>';
+                        layer.open({
+                            type: 1,
+                            btn: ['确认完结', '取消'],
+                            area: ['700px', '400px'],
+                            content: showallru,
+                            closeBtn:1,
+                            yes: function (index, layero) {
+                                 if ($("#finishta").attr('lock')) {
+                                     return false;
+                                  }
+                                //完结提案
+                                 var wfid = $("#finishta").data("fileid");
+                                if (wfid == "0") { layer.alert("请上传完结报告！！"); return false }
+                                var transby = $("#breakta").data("transby")
+                                var delusername = $("#finishta").data("delusername");
+                                $("#finishta").attr('lock',1);
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/Topic/FinishTa",
+                                    data: { wid: fid, transby: transby, wfileid: wfid, deluser: $("#finishta").data('delrid'),delusername: delusername},
+                                    success: function (data) {
+                                        
+                                        var roj = JSON.parse(data);
+                                        if (roj.success) {
+                                            layer.msg(roj.exinfo, {
+                                                icon: 1
+                                                , time: 2000
+                                            }, function () {
+                                                    $("#finishta").attr('lock','');
+                                                window.location.reload()
+                                            });
+                                        } else {
+                                            $("#finishta").attr('lock','');
+                                            layer.alert(roj.exinfo)
+                                        }
+                                    }
+                                });
+                            }
+                            , btn2: function (index, layero) {
+                                $("#finishta").data("delrid", "0")
+                                $("#finishta").data("delusername", "")
+                                layer.close()
+                            }, cancel: function () {
+                               layer.close()
+                            }
+                        })
+                    } else {
+                        layer.alert(allrobj.msg)
+                    }
+                }
+            })
+        });
+
+
+        //删除实施人
+        function deluser(drrn,drid, delrowid) {
+            //点击完结后才能进行操作。
+            var fdrd = $("#finishta").data('delrid');
+            var fdrn = $("#finishta").data('delusername');
+            fdrd == "0" ? fdrd = drid : fdrd = fdrd + "," + drid;
+            fdrn == "" ? fdrn = drrn : fdrn = fdrn + "," + drrn;
+            $("#finishta").data("delrid", fdrd);
+            $("#finishta").data("delusername", fdrn);
+             $("#rurow" + delrowid).remove();
+
+        }
+
+        //实施人添加实施人
+        $("#addnewtrbtn").on('click', function () {
+            var taname = $("#newtruseradd").val();
+            if (taname == "") {
+                layer.alert("用户名不准为空");
+                return;
+            }
+            var tid = $("#addnewtrbtn").data("id");
+            var addope = $("#addnewtrbtn").data("transby");
+            $.ajax({
+                type: "POST",
+                url: "/Topic/AddReplybyTeamLeader",
+                data: { username: taname, topicid: tid, addbys:addope},
+                success: function (data) {
+                    var poj = JSON.parse(data);
+                    if (poj.success) {
+                         layer.msg('添加成功，2秒后刷新页面', {
+                                                icon: 1
+                                                , time: 2000
+                                            }, function () {
+                                                window.location.reload()
+                         });
+                    } else {
+                        layer.alert(poj.ex)
+                    }
+                }
+            });
+
+        })
+
+        //中止提案
+        $("#breakta").on('click', function () {
+            var bkid = $("#breakta").data("id");
+            var bkuser = $("#breakta").data("transby");
+            layer.confirm('确认中止提案么？', {
+                btn: ['确认', '取消'] //按钮
+            }, function (index) {
+                layer.close(index);
+                layer.prompt({
+                    formType: 0,
+                    value: '',
+                    title: '请输入中止理由',
+                }, function (value, index, elem) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Topic/BreakTian",
+                        data: { bid: bkid, breakreason: value, bkusername: bkuser },
+                        success: function (data) {
+                            var bkoj = JSON.parse(data);
+                            if (bkoj.success) {
+                                layer.close(index);
+                                layer.msg("提案已中止成功！")
+                            } else {
+                                layer.close(index);
+                                layer.msg(bkoj.exinfo)
+                            }
+                        }
+                    });
+                }, function (index) {
+                    layer.close(index);
+                });
+            })
+        });
+
+        //删除文件
+        function delokfile(dfid, tid) {
+            layer.confirm('确认删除此文件么？', {
+                btn: ['确认', '取消'] //按钮
+            }, function (index) {
+                layer.close(index);
+                $.ajax({
+                    type: "POST",
+                    url: "/Tool/DeleteFile",
+                    data: { dfid: dfid, tid: tid },
+                    success: function (data) {
+                        var dfoj = JSON.parse(data);
+                        if (dfoj.success) {
+                            layer.msg("删除成功", {
+                                icon: 1
+                                , time: 1000
+                            }, function () {
+                                window.location.reload()
+                            });
+                        } else {
+                            layer.msg(dfoj.exinfo)
+                        }
+                    }
+                });
+            }, function (index) {
+                layer.close(index);
+            });
+        }
+
+
+        /*
+        //点击图片放大
+        $("#imgcontent img").on('click', function () {
+            //layer.alert("图片测试");
+            var _this = $(this);//将当前的pimg元素作为_this传入函数  
+            imgShow("#outerdiv", "#innerdiv", "#bigimg", _this);
+        });
+
+
+        function imgShow(outerdiv, innerdiv, bigimg, _this) {
+            var src = _this.attr("src");//获取当前点击的pimg元素中的src属性  
+            $(bigimg).attr("src", src);//设置#bigimg元素的src属性  
+
+            /*获取当前点击图片的真实大小，并显示弹出层及大图
+            $("<img/>").attr("src", src).on('load', function () {
+                var windowW = $(window).width();//获取当前窗口宽度  
+                var windowH = $(window).height();//获取当前窗口高度  
+                var realWidth = this.width;//获取图片真实宽度  
+                var realHeight = this.height;//获取图片真实高度  
+                var imgWidth, imgHeight;
+                var scale = 0.8;//缩放尺寸，当图片真实宽度和高度大于窗口宽度和高度时进行缩放  
+
+                if (realHeight > windowH * scale) {//判断图片高度  
+                    imgHeight = windowH * scale;//如大于窗口高度，图片高度进行缩放  
+                    imgWidth = imgHeight / realHeight * realWidth;//等比例缩放宽度  
+                    if (imgWidth > windowW * scale) {//如宽度扔大于窗口宽度  
+                        imgWidth = windowW * scale;//再对宽度进行缩放  
+                    }
+                } else if (realWidth > windowW * scale) {//如图片高度合适，判断图片宽度  
+                    imgWidth = windowW * scale;//如大于窗口宽度，图片宽度进行缩放  
+                    imgHeight = imgWidth / realWidth * realHeight;//等比例缩放高度  
+                } else {//如果图片真实高度和宽度都符合要求，高宽不变  
+                    imgWidth = realWidth;
+                    imgHeight = realHeight;
+                }
+                $(bigimg).css("width", imgWidth);//以最终的宽度对图片缩放  
+
+                var w = (windowW - imgWidth) / 2;//计算图片与窗口左边距  
+                var h = (windowH - imgHeight) / 2;//计算图片与窗口上边距  
+                $(innerdiv).css({ "top": h, "left": w });//设置#innerdiv的top和left属性  
+                $(outerdiv).fadeIn("fast");//淡入显示#outerdiv及.pimg  
+            });
+
+            $(outerdiv).on('click', function () {//再次点击淡出消失弹出层  
+                $(this).fadeOut("fast");
+            });
+        }*/
+
+
+    </script>
+}
+<style type="text/css">
+    /*#timelinecontent {
+        margin-top: 50px;
+        text-align: center;
+    }
+
+    section.timeline-outer {
+        width: 80%;
+        margin: 0 auto;
+    }
+
+    h1.header {
+        font-size: 50px;
+        line-height: 70px;
+    }
+    /* Timeline 
+
+    .timeline {
+        border-left: 8px solid #42A5F5;
+        border-bottom-right-radius: 2px;
+        border-top-right-radius: 2px;
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+        color: #333;
+        margin: 20px auto auto 60px;
+        letter-spacing: 0.5px;
+        position: relative;
+        line-height: 1.4em;
+        padding: 20px;
+        list-style: none;
+        text-align: left;
+    }
+
+        .timeline h1,
+        .timeline h2,
+        .timeline h3 {
+            font-size: 10px;
+        }
+
+        .timeline .event {
+            border-bottom: 1px solid rgba(160, 160, 160, 0.2);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+            .timeline .event:last-of-type {
+                padding-bottom: 0;
+                margin-bottom: 0;
+                border: none;
+            }
+
+            .timeline .event:before,
+            .timeline .event:after {
+                position: absolute;
+                display: block;
+                top: 0;
+            }
+
+            .timeline .event:before {
+                left: -177.5px;
+                color: #212121;
+                content: attr(data-date);
+                text-align: right;
+                /*  font-weight: 100;
+                font-size: 10px;
+                min-width: 120px;
+            }
+
+            .timeline .event:after {
+                box-shadow: 0 0 0 8px #42A5F5;
+                left: -30px;
+                background: #212121;
+                border-radius: 50%;
+                height: 11px;
+                width: 11px;
+                content: "";
+                top: 5px;
+            }*/
+    /**/
+    /*——————————————
+    Responsive Stuff
+    ———————————————*/
+
+    /*media (max-width: 945px) {
+
+      .timeline .event::before {
+        left: 0.5px;
+        top: 20px;
+        min-width: 0;
+        font-size: 13px;
+      }
+      .timeline h3 {
+        font-size: 16px;
+      }
+      .timeline p {
+        padding-top: 20px;
+      }
+      section.lab h3.card-title {
+        padding: 5px;
+        font-size: 16px
+      }
+
+
+    /*media (max-width: 768px) {
+      .timeline .event::before {
+        left: 0.5px;
+        top: 20px;
+        min-width: 0;
+        font-size: 13px;
+      }
+      .timeline .event:nth-child(1)::before,
+      .timeline .event:nth-child(3)::before,
+      .timeline .event:nth-child(5)::before {
+        top: 38px;
+      }
+      .timeline h3 {
+        font-size: 16px;
+      }
+      .timeline p {
+        padding-top: 20px;
+      }
+    }*/
+    /*——————————————
+    others
+    ———————————————*/
+</style>
+
+
+
+

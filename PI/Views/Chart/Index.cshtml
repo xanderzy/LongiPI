@@ -1,0 +1,144 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+
+    <script type="text/javascript" src="../../chartall/js/rem.js"></script>
+    <link rel="stylesheet" href="../../chartall/css/style.css">
+    <title>提案改善系统数据</title>
+</head>
+
+<body style="visibility: hidden;">
+    <div class="container-flex" tabindex="0" hidefocus="true">
+        <div class="box-left">
+            <div class="left-top">
+                <div class="current-num">
+                    <div>2020总完结数</div>
+                    <p id="sumta">0</p>
+                </div>
+            </div>
+            <div class="left-center">
+                <div class="title-box">
+                    <h6>年度指标达成率</h6>
+                </div>
+                <div class="chart-box pie-chart">
+                    <div id="pie" class="div1"></div>
+                    <div class="div2">
+                        <div class="pie-data">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="left-bottom" class="select">
+                <div class="title-box">
+                    <h6>月度结案趋势</h6>
+                </div>
+                <div class="chart-box">
+                    <div id="gdMap" class="gd-map"></div>
+                </div>
+            </div>
+        </div>
+        <div class="box-center">
+            <div class="center-top">
+                <h1>提案改善系统</h1>
+            </div>
+            <div class="center-center">
+                <div class="weather-box">
+                    <div class="data">
+                        <p class="time" id="time">00:00:00</p>
+                        <p id="date"></p>
+                    </div>
+                    <div class="weather">
+                        <img id="weatherImg" src="../../chartall/images/weather/weather_img01.png" alt="">
+                        <div id="weather">
+                            <p class="active">多云</p>
+                            <p>16-22℃</p>
+                            <p>衢州市衢江区</p>
+                        </div>
+                    </div>
+                </div>
+                <img src="../../chartall/images/line_bg.png" alt="">
+                <div class="select-box">
+                    <div class="flex-item">
+                        <div class="select" tabindex="0" hidefocus="true">
+                            <div class="select-div" id="depselect">
+                                技术部
+                            </div>
+                            <ul class="select-ul company">
+                                <li class="active" data-value="1">生产一组</li>
+                                <li data-value="2">生产二组</li>
+                                <li data-value="3">生产三组</li>
+                                <li data-value="4">设备部</li>
+                                <li data-value="5">质量部</li>
+                                <li data-value="6">总经理办公室</li>
+                                <li data-value="7">财务部</li>
+                                <li data-value="8">采购履行部</li>
+                                <li data-value="9">动力部</li>
+                                <li data-value="10">IE运营部</li>
+                                <li data-value="11">人力资源部</li>
+                                <li data-value="12">计划物控部</li>
+                                <li data-value="13">仓储物流部</li>
+                            </ul>
+                        </div>
+                        <div class="select" tabindex="0" hidefocus="true">
+                            <div class="select-button" id="lookinfo">
+                                查看详情数据
+                            </div>
+                        </div>
+                    </div>
+                    <div class="new-button" id="entersys">
+                        进入系统
+                    </div>
+                 </div>
+            </div>
+            <div class="center-bottom">
+                <div class="chart-box">
+                    <div id="chart4" style="width:100%;height:95%;"></div>
+                </div>
+                <div class="city-data">
+                    <ul class="ranking-box">
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+        <div class="box-right">
+            <div class="right-top">
+                <div class="title-box">
+                    <h6 id="barTitle">提案进度分类-所有</h6>
+                </div>
+                <div class="chart-box">
+                    <div id="chart3" style="width:100%;height:100%;"></div>
+                </div>
+            </div>
+            <div class="right-center">
+                <div class="title-box">
+                    <h6>各部门月度结案对比</h6>
+                </div>
+                <div class="chart-box">
+                    <div id="chart5" style="width: 100%;height:95%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../chartall/js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="../../chartall/js/echarts.min.js"></script>
+    <script type="text/javascript" src="../../chartall/js/china.js"></script>
+    <script type="text/javascript" src="../../chartall/js/zybase.js"></script>
+    <script type="text/javascript">
+        $('document').ready(function () {
+            $("body").css('visibility', 'visible');
+        })
+    </script>
+</body>
+ </html>

@@ -1,0 +1,362 @@
+﻿
+@{
+
+}
+<div class="fly-panel" style="padding:20px">
+    <table id="markbypaifatabel" lay-filter="markbypaifatabel"></table>
+    <script type="text/html" id="mbpftool">
+        <a class="layui-btn layui-btn-xs layui-btn" lay-event="paifamarks">派发</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="backtogood">驳回</a>
+        <a class="layui-btn layui-btn-xs layui-btn-primary" lay-event="paifafujian">查看附件</a>
+    </script>
+</div>
+@section Scripts{
+    <script>
+        var table = layui.table;
+        var form = layui.form;
+
+        table.render({
+            elem: '#markbypaifatabel'
+            , url: '/Admin/Manage/GetAllNoMark' //数据接口
+            , page: true //开启分页
+            , limit: 10 //每页显示行数
+            , id: 'laymbpftable'
+            , cols: [[ //表头
+                { field: 'UserName', title: '提案人', width: '15%' }
+                , { field: 'NodeName', title: '提案类别', width: '10%' }
+                , {
+                    field: 'Title', title: '标题', width: '30%', templet: function (d) {
+                        return '<a href="/Topic/Index/' + d.Id + '"' + ' class="layui-table-link">' + d.Title + '</a>';
+                    }
+                }
+                , {
+                    field: 'FinishTime', title: '实施完成时间', width: '20%', templet: function (d) {
+                        var datet = new Date(d.FinishTime);
+                        var o = {
+                            "M+": datet.getMonth() + 1,                 //月份
+                            "d+": datet.getDate(),                    //日
+                            "h+": datet.getHours(),                   //小时
+                            "m+": datet.getMinutes(),                 //分
+                            "s+": datet.getSeconds(),                 //秒
+                            "q+": Math.floor((datet.getMonth() + 3) / 3), //季度
+                            "S": datet.getMilliseconds()             //毫秒
+                        };
+                        var fmt = "yyyy-MM-dd hh:mm:ss";
+                        if (/(y+)/.test(fmt))
+                            fmt = fmt.replace(RegExp.$1, (datet.getFullYear() + "").substr(4 - RegExp.$1.length));
+                        for (var k in o)
+                            if (new RegExp("(" + k + ")").test(fmt))
+                                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                        return fmt;
+                    }
+                }, {
+                    toolbar: '#mbpftool',
+                    title: '操作',
+                    width: '25%',
+                    align: 'center'
+                }
+            ]]
+        });
+
+          //表格事件
+        table.on('tool(markbypaifatabel)', function (obj) {
+            var layer = layui.layer;
+            var objdata = obj.data;
+            var mbid = objdata.Id;
+            if (obj.event === 'paifamarks') {
+                var showpage =
+                    '<div class="fly-panel" style="padding:20px">' +
+                    '<div class="layui-form" lay-filter="markaddform">' +
+                    '<div class="layui-form-item">' +
+                    '<div class="layui-inline">' +
+
+                    '<div class="layui-input-inline" style="width:200px">' +
+                    '<select name="markperson"  id="markbyadd" lay-search>' +
+                    '<option value="">请选择打分人员</option>' +
+                    '<option value="管理员">管理员</option>' +
+                    '<option value="潘庚臣">潘庚臣</option>' +
+                    '<option value="王佳">王佳</option>' +
+                    '<option value="张兴">张兴</option>' +
+                    '<option value="周超">周超</option>' +
+                    '<option value="程锋">程锋</option>' +
+                    '<option value="郑礼华">郑礼华</option>' +
+                    '<option value="余学军">余学军</option>' +
+                    '<option value="胡于桥">胡于桥</option>' +
+                    '<option value="卢志君">卢志君</option>' +
+                    '<option value="邓升祥">邓升祥</option>' +
+                    '<option value="高锐">高锐</option>' +
+                    '<option value="吕爱峰">吕爱峰</option>' +
+                    '<option value="孙京新">孙京新</option>' +
+                    '<option value="袁尧年">袁尧年</option>' +
+                    '<option value="李振海">李振海</option>' +
+                    '<option value="王玉乐">王玉乐</option>' +
+                    '<option value="翁诚彬">翁诚彬</option>' +
+                    '<option value="汪广宝">汪广宝</option>' +
+                    '<option value="汪慕华">汪慕华</option>' +
+                    '<option value="沈相健">沈相健</option>' +
+                    '</select>' +
+                    '</div>' +
+
+                    '<div class="layui-input-inline">' +
+                    '<input type="button" class="layui-btn" id="addmb" value="添加" />' +
+                    '</div>' +
+
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="layui-check-list">' +
+                    '<table id="markbytable" lay-filter="markbytable"></table>' +
+                    '<script type="text/html" id="markbytable_tool">' +
+                    '<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="mbdel">删除</a>' +
+                    '<\/script>' +
+                    '</div>' +
+                    '<input type="button" class="layui-btn" id="okmark" value="派发" style="display:none"/>' +
+                    '</div>';
+
+                layer.open({
+                    type: 1,   // 6可以使表单超出部分不被遮挡
+                    title: '添加打分人员',
+                    area: ['800px', '500px'],
+                    btn: ['确认', '取消'],
+                    btnAlign: 'c',   // 按钮居中
+                    content: showpage,
+                    success: function (layero, index) {
+                        //将下拉列表赋值进去-先静态吧
+                        //静态的话。。直接我写进去算了- -
+                        form.render(null, 'markaddform')
+
+                        var repeatlot = new Array();
+                        var stabledata = [];
+                        //获取初始人员防止重复添加
+                        $.ajax({
+                            type: "POST",
+                            url: "/Admin/Manage/MarkByInfo",
+                            async: false,
+                            data: { id: mbid },
+                            success: function (data) {
+                                var poj = JSON.parse(data);
+                                if (poj.success) {
+                                    stabledata = poj.data
+                                    for (var i = 0; i < poj.data.length; i++) {
+                                        repeatlot.push(poj.data[i].realname);
+                                    }
+                                }
+                            }
+                        });
+                        //渲染表格
+                        var tableIns = table.render({
+                            elem: '#markbytable',
+                            height: 200,
+                            defaultToolbar: [],
+                            limit: 60,
+                            data: stabledata,
+                            cols: [
+                                [{
+                                    field: 'rid',
+                                    title: 'rid',
+                                    hide: true
+                                },
+                                {
+                                    field: 'username',
+                                    title: '工号',
+                                    width: '20%'
+                                },
+                                {
+                                    field: 'realname',
+                                    title: '姓名',
+                                    width: '30%'
+                                },
+                                {
+                                    field: 'dep',
+                                    title: '部门',
+                                    width: '30%'
+                                },
+                                {
+                                    toolbar: '#markbytable_tool',
+                                    title: '操作',
+                                    width: '20%',
+                                    align: 'center'
+                                }
+                                ]
+                            ],
+                        });
+                        //添加人员
+                        $("#addmb").on('click', function () {
+                            var taname = $("#markbyadd").val();
+                            if (taname == "") {
+                                layer.alert("用户名不准为空");
+                                return;
+                            }
+                            var repeatresult = repeatlot.indexOf(taname);
+                            if (repeatresult >= 0) {
+                                layer.alert('此用户已添加!')
+                                $("#markbyadd").val('');
+                                return;
+                            }
+                            $.ajax({
+                                type: "POST",
+                                url: "/Admin/Manage/AddMarkBy",
+                                data: { username: taname, topicid: mbid },
+                                success: function (data) {
+                                    var poj = JSON.parse(data);
+                                    if (poj.success) {
+                                        $("#markbyadd").val("");
+                                        var aplObj = tableIns;
+                                        var aplconfig = aplObj.config;
+                                        var apldataTemp = aplconfig.data;
+                                        apldataTemp.push({
+                                            "rid": poj.rid,
+                                            "username": poj.username,
+                                            "realname": poj.realname,
+                                            "dep": poj.dep
+                                        });
+                                        tableIns = table.reload(aplconfig.id, $.extend(true, {
+                                            data: apldataTemp,
+                                        }, {}));
+                                        repeatlot.push(poj.realname);
+                                    } else {
+                                        layer.alert(poj.ex);
+                                    }
+                                }
+                            });
+                        })
+
+                        //删除打分人员
+                        table.on('tool(markbytable)', function (obj) {
+                            switch (obj.event) {
+                                case 'mbdel':
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "/Admin/Manage/DeleteMarkBys",
+                                        data: { marktid: obj.data.rid },
+                                        success: function (data) {
+                                            var roj = JSON.parse(data);
+                                            if (roj.success) {
+                                                var tableObj = tableIns;
+                                                var pdconfig = tableObj.config;
+                                                var pddataTemp = pdconfig.data;
+                                                var page = pdconfig.page;
+                                                var trElem = obj.tr.first();
+                                                var index = trElem.data('index');
+                                                var dataIndex = index
+                                                pddataTemp.splice(dataIndex, 1);
+                                                tableIns = table.reload(pdconfig.id, $.extend(true, {
+                                                    data: pddataTemp
+                                                }, {}));
+                                                repeatlot.splice($.inArray(obj.data.realname, repeatlot), 1);
+                                            } else {
+                                                layer.alert(roj.ex, { time: 1000 })
+                                            }
+                                        }
+                                    });
+                                    break;
+                                default:
+                                    break;
+                            }
+                        });
+
+                        //通过提案
+                        $("#okmark").on('click', function () {
+                            if (repeatlot.length == 0) {
+                                layer.alert("请先添加实施人员");
+                                return;
+                            } else {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/Admin/Manage/MarkToIng",
+                                    data: { id: mbid },
+                                    success: function (data) {
+                                        var roj = JSON.parse(data);
+                                        if (roj.success) {
+                                            layer.close(index);
+                                            obj.del();
+                                        } else {
+                                            layer.alert(roj.exinfo);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    },
+                    yes: function (index, layero) {
+                        layero.find('#okmark').click();    // 这一句就是点击确认按钮触发form的隐藏提交
+                    },
+                    btn2: function (index, layero) {
+                        layer.close(index);
+                    }
+                })
+            }
+            else if (obj.event === 'paifafujian') {
+                var filelistshow = '<div class="fly-panel" style="padding:20px">';
+                //选获取当前的filelist
+                $.ajax({
+                    type: "POST",
+                    url: "/Admin/Manage/GetTopicFilelist",
+                    data: { topicid: mbid },
+                    success: function (data) {
+                        var resfile = JSON.parse(data);
+                        if (resfile.code == "0") {
+                            var ffshow = "";
+                            var wfshow = "";
+                            var fjdata = resfile.ffdata;
+                            var wjdata = resfile.wfdata;
+                            if (fjdata != null || fjdata != []) {
+                                ffshow = '<h3 style="color:gray">提案附件</h3><hr>';
+                                for (var k = 0; k < fjdata.length; k++) {
+                                    var ffrow = '<i class="layui-icon layui-icon-link"></i><a href="/Topic/DownLoad?fiid=' + fjdata[k].Id + '">' + fjdata[k].FileName + fjdata[k].FileExt + '</a><br/>';
+                                    ffshow = ffshow + ffrow;
+                                }
+                            }
+                            if (wjdata != null || wjdata != []) {
+                                wfshow = '<h3 style="color:gray">完结报告</h3><hr>';
+                                for (var j = 0; j < wjdata.length; j++) {
+                                    var wfrow = '<i class="layui-icon layui-icon-link"></i><a href="/Tool/DownLoad?fiid=' + wjdata[j].Id + '">' + wjdata[j].FileName + wjdata[j].FileExt + '</a><br/>';
+                                    wfshow = wfshow + wfrow;
+                                }
+                            }
+                            if (ffshow == "" && wfshow == "") { layer.alert("此提案无任何附件"); return false; }
+                            filelistshow = filelistshow + ffshow + '<br/>' + wfshow + '</div>';
+
+
+                            layer.open({
+                                type: 1,   // 6可以使表单超出部分不被遮挡
+                                title: '附件下载',
+                                area: ['400px', '300px'],
+                                content: filelistshow,
+                                success: function (layero, index) { }
+                            });
+
+                        }
+                    }
+                });
+            } else if (obj.event === 'backtogood') {
+                var tid=obj.data.Id
+                 layer.prompt({
+                        formType: 0,
+                        value: '',
+                        title: '请输入驳回理由',
+                    }, function (value, index, elem) {
+                        $.ajax({
+                            url: "/Admin/Manage/BackToGood",
+                            data: { tid: tid, backreason: value },
+                            success: function (data) {
+                                var re = JSON.parse(data);
+                                if (!re.success) {
+                                    layer.alert(res.msg)
+                                } else {
+                                    layer.close(index);
+                                    obj.del();
+                                    layer.msg(re.msg, {
+                                        time: 2000
+                                    });
+                                }
+                            }
+                        })
+                    })
+            }
+        })
+
+
+
+    </script>
+}

@@ -1,0 +1,82 @@
+﻿
+<div class="fly-panel fly-panel-user" pad20>
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">姓名</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="txt_search_name" placeholder="请输入姓名" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline layui-col-md-offset2">
+                <button class="layui-btn" id="btn_query1" data-type="reload">查询</button>
+            </div>
+        </div>
+    </div>
+    <table id="userreport"></table>
+</div>
+
+@section Scripts{
+    <script>
+
+        layui.use('table', function () {
+            var table = layui.table;
+            table.render({
+                elem: '#userreport'
+                , url: '/Home/GetUserInfoReport' //数据接口
+                , page: true //开启分页
+                , limit: 10 //每页显示行数
+                , toolbar: true //导出打印工具栏
+                , id: 'UserReportReload'
+                , cols: [[ //表头
+                    { field: 'UserName', title: '工号',width:'10%'}
+                    , { field: 'RealName', title: '姓名', width: '15%' }
+                    , { field: 'Department', title: '部门', width: '15%'}
+                    , { field: 'Email', title: '邮箱', width: '15%'}
+                    , { field: 'TopicCount', title: '提案数量', width: '10%'}
+                    , { field: 'TopicReplyCount', title: '改善数量', width: '10%'}
+                    , {
+                        field: 'CreateOn', title: '注册日期', width: '25%', templet: function (d) {
+                            var datet = new Date(d.CreateOn);
+                            var o = {
+                                "M+": datet.getMonth() + 1,                 //月份
+                                "d+": datet.getDate(),                    //日
+                                "h+": datet.getHours(),                   //小时
+                                "m+": datet.getMinutes(),                 //分
+                                "s+": datet.getSeconds(),                 //秒
+                                "q+": Math.floor((datet.getMonth() + 3) / 3), //季度
+                                "S": datet.getMilliseconds()             //毫秒
+                            };
+                            var fmt = "yyyy-MM-dd hh:mm:ss";
+                            if (/(y+)/.test(fmt))
+                                fmt = fmt.replace(RegExp.$1, (datet.getFullYear() + "").substr(4 - RegExp.$1.length));
+                            for (var k in o)
+                                if (new RegExp("(" + k + ")").test(fmt))
+                                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                            return fmt;
+                        }}
+                ]]
+            });
+
+            var $ = layui.$, active = {
+                reload: function () {
+                    var tusername = $('#txt_search_name');
+                    table.reload('UserReportReload', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            username: tusername.val()
+                        }
+                    });
+                }
+            };
+            $("#btn_query1").on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            })
+        });
+    </script>
+}
+
+

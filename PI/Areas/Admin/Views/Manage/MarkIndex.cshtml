@@ -1,0 +1,277 @@
+﻿
+@{
+    ViewData["Title"] = "TestAll";
+}
+    <div style="margin:20px">
+        <span class="layui-breadcrumb">
+            <a href="">提案管理</a>
+            <a><cite>总部评分</cite></a>
+        </span>
+        <div class="layui-form" lay-filter="rsform" style="margin-top:20px">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" id="txt_search_title" placeholder="请输入标题" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select id="oastatus">
+                            <option value="" selected></option>
+                            <option value=1>已提交OA</option>
+                            <option value=0>未提交OA</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn" id="btn_query" data-type="reload">查询</button>
+                </div>
+            </div>
+        </div>
+
+
+        <table id="adminmark" lay-filter="adminmark"></table>
+        <script type="text/html" id="markbar">
+            <a class="layui-btn layui-btn-xs" lay-event="look">查看</a>
+            <a class="layui-btn layui-btn-xs" lay-event="mark">打分</a>
+            <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="markbohui">驳回</a>
+            {{#  if(d.Top==0){ }}
+            <a class="layui-btn layui-btn-xs" lay-event="oa">提交OA</a>
+            {{#  } }}
+        </script>
+        </div>
+
+        @section Scripts{
+            <script>
+                var table = layui.table;
+                var tableIns = table.render({
+                    elem: '#adminmark'
+                    , url: '/Admin/Manage/GetMarkRpt' //数据接口
+                    , page: true //开启分页
+                    , limit: 10 //每页显示行数
+                    , limits: [10,50,100, 200, 300,500]
+                    , id: 'layadminmark'
+                    , toolbar: true
+                    , cols: [[ //表头
+                        { field: 'UserName', title: '工号', width: '10%' }
+                        , { field: 'RealName', title: '姓名', width: '10%' }
+                        , {
+                            field: 'CreateOn', title: '发布日期', width: '15%',
+                            templet: function (d) {
+                                var datet = new Date(d.CreateOn);
+                                var o = {
+                                    "M+": datet.getMonth() + 1,                 //月份
+                                    "d+": datet.getDate(),                    //日
+                                    "h+": datet.getHours(),                   //小时
+                                    "m+": datet.getMinutes(),                 //分
+                                    "s+": datet.getSeconds(),                 //秒
+                                    "q+": Math.floor((datet.getMonth() + 3) / 3), //季度
+                                    "S": datet.getMilliseconds()             //毫秒
+                                };
+                                var fmt = "yyyy-MM-dd hh:mm:ss";
+                                if (/(y+)/.test(fmt))
+                                    fmt = fmt.replace(RegExp.$1, (datet.getFullYear() + "").substr(4 - RegExp.$1.length));
+                                for (var k in o)
+                                    if (new RegExp("(" + k + ")").test(fmt))
+                                        fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                                return fmt;
+                            }
+                        }
+                        , {
+                            field: 'Top', title: 'OA流程中', width: '10%', templet: function (d) {
+                                if (d.Top == 1) {
+                                    return '<i class="layui-icon layui-icon-face-smile" style="font-size: 30px; color: green;"></i>'
+                                } else {
+                                    return '<i class="layui-icon layui-icon-face-cry" style="font-size: 30px; color:red;"></i>'
+                                }
+                            }
+                        }
+                        , {
+                            field: 'Title', title: '标题', width: '25%', templet: function (d) {
+                                return '<a href="/Topic/Index/' + d.Id + '"' + ' target="_blank" class="layui-table-link">' + d.Title + '</a>';
+                            }
+                        },
+                         , {
+                            field: 'TopicMark', title: '基地得分', width: '10%'
+                        }
+                        , { title: '操作', width: '20%', toolbar: '#markbar' }
+                    ]]
+                });
+
+                $("#btn_query").on('click', function () {
+                    var ttitle = $('#txt_search_title').val();
+                    $('#txt_search_title').val('');
+                    var oastatus = $('#oastatus option:selected').val();
+                    table.reload('layadminmark', {
+                        where: {
+                            title: ttitle,
+                            oastatus:oastatus
+                        }
+                    });
+                });
+
+
+
+
+                //单元格编辑框  tool
+                table.on('tool(adminmark)', function (obj) {
+                    var data = obj.data;
+                    if (obj.event === 'mark') {
+                        var topicid = data.Id;
+                        layer.confirm('确认打分么？', {
+                            btn: ['确定', '取消'] //按钮
+                        }, function (index) {
+                            layer.close(index);
+                            layer.prompt({
+                                formType: 0,
+                                value: '',
+                                title: '请输入分数',
+                            }, function (value, index, elem) {
+                                var reg = new RegExp("^([1-9]|[1-9]\\d|100)$");
+                                if (!reg.test(value)) {
+                                    alert("请输入1-100的整数！");
+                                    return false;
+                                }
+                                $.ajax({
+                                    url: "/Admin/Manage/MarkTopic",
+                                    data: { maid: topicid, mark: value, marktype: 2 },
+                                    success: function (data) {
+                                        var re = JSON.parse(data);
+                                        if (re.success == false) {
+                                            layer.msg(re.exinfo, {
+                                                time: 1000
+                                            });
+                                        } else {
+                                            layer.close(index);
+                                            layer.msg(re.exinfo, {
+                                                time: 1000
+                                            });
+                                            tableIns.reload({
+                                                page: {
+                                                    curr: 1
+                                                }
+                                            });
+                                        }
+                                    }
+                                })
+                            })
+                        }, function (index) {
+                            layer.close(index);
+                        });
+                    }
+                    else if (obj.event === 'look') {
+                        var showfirsthtml = '<div id="showdetail" class="site-content" style="padding:20px">' +
+                            '<div class="site-title">' +
+                            ' <h1>' + obj.data.Title + '</h1> ' +
+                            '<div>' +
+                            '<blockquote class="layui-elem-quote">' +
+                            obj.data.UserName + '-' + obj.data.RealName + '-' + obj.data.Department +
+                            '<p>发布于' + obj.data.CreateOn + '</p>' +
+                            '</blockquote>' +
+                            '</div class="site-text">' +
+                            '<div class="layui-field-box">' +
+                            '<h2 style="color:gray">提案背景</h2> <hr>' +
+                            obj.data.Content +
+                            '<h2 style="color:gray">建议改善</h2><hr>' +
+                            obj.data.Suggest;
+
+                        if (obj.data.HasUpload == "0") {
+                            showfirsthtml = showfirsthtml + '</div>' + '</div>';
+                            layer.open({
+                                type: 1,
+                                title: false,
+                                closeBtn: 0,
+                                shadeClose: true,
+                                area: ['700px', '400px'],
+                                content: showfirsthtml
+                            })
+                        }
+                        else {
+                            $.ajax({
+                                url: "/Tool/GetFileInfo",
+                                data: { filehasupload: obj.data.HasUpload },
+                                success: function (data) {
+                                    var resobj = JSON.parse(data)
+                                    if (resobj.code == 0) {
+                                        var filelist = "";
+                                        for (var l = 0; l < resobj.data.length; l++) {
+                                            var filestring = '<a href="/Tool/Download?fiid=' + resobj.data[l].Id + '" style="color:blue">' + resobj.data[l].FileName + '</a><br/>';
+                                            if (filelist == "") {
+                                                filelist = filestring
+                                            } else {
+                                                filelist = filelist + filestring
+                                            }
+                                        }
+                                        showfirsthtml = showfirsthtml +
+                                            '<h2 style="color:gray">附件下载</h2><hr>' +
+                                            filelist
+                                            + '</div>' + '</div>';
+                                    } else {
+                                        showfirsthtml = showfirsthtml +
+                                            '<h2 style="color:gray">附件下载</h2><hr>' +
+                                            '<p>文件数据读取失败，请联系开发人员！！！</p>'
+                                            + '</div>' + '</div>';
+                                    }
+                                    layer.open({
+                                        type: 1,
+                                        title: false,
+                                        closeBtn: 0,
+                                        shadeClose: true,
+                                        area: ['700px', '400px'],
+                                        content: showfirsthtml
+                                    })
+                                }
+                            })
+
+                        }
+                    } else if (obj.event === 'oa') {
+                        $.ajax({
+                            url: "/Admin/Manage/OAChange",
+                            data: { oaid: data.Id },
+                            success: function (res) {
+                                table.reload('layadminmark');
+                            }
+                        })
+                    } else if (obj.event === 'markbohui') {
+                        var topicid = data.Id;
+                        layer.prompt({
+                            formType: 0,
+                            value: '',
+                            title: '请重新评分',
+                        }, function (value, index, elem) {
+                            $.ajax({
+                                url: "/Admin/Manage/BohuiMark",
+                                data: { maid: topicid, mark: value, marktype: 1 },
+                                success: function (data) {
+                                    var re = JSON.parse(data);
+                                    if (re.success == false) {
+                                        layer.msg(re.exinfo, {
+                                            time: 1000
+                                        });
+                                    } else {
+                                        layer.close(index);
+                                        layer.msg(re.exinfo, {
+                                            time: 1000
+                                        });
+                                        tableIns.reload({
+                                            page: {
+                                                curr: 1
+                                            }
+                                        });
+                                    }
+                                }
+                            })
+
+
+
+
+
+                        }, function (index) {
+                            layer.close(index);
+                        })
+
+
+                    }
+                })
+            </script>
+        }

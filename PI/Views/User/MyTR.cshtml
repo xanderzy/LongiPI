@@ -1,0 +1,188 @@
+﻿
+@{
+    ViewData["Title"] = "个人中心";
+}
+    <div class="layui-container fly-marginTop fly-user-main">
+        <ul class="layui-nav layui-nav-tree layui-inline" lay-filter="user" style="z-index:1">
+            <li class="layui-nav-item">
+                <a asp-controller="User" asp-action="MyHome">
+                    <i class="layui-icon">&#xe609;</i>
+                    我的主页
+                </a>
+            </li>
+            <li class="layui-nav-item  layui-this">
+                <a asp-controller="User" asp-action="MyTR">
+                    <i class="layui-icon">&#xe612;</i>
+                    用户中心
+                </a>
+            </li>
+            <li class="layui-nav-item">
+                <a asp-controller="User" asp-action="UserInfo">
+                    <i class="layui-icon">&#xe620;</i>
+                    基本设置
+                </a>
+            </li>
+            <li class="layui-nav-item">
+                <a asp-controller="User" asp-action="MyCheck">
+                    <i class="layui-icon">&#xe611;</i>
+                    我的审核
+                </a>
+            </li>
+        </ul>
+
+
+
+
+        <div class="fly-panel fly-panel-user" pad20>
+            <div class="layui-btn-group" style="margin:20px 0" id="btngroup">
+                <button type="button" class="layui-btn layui-btn-danger">实施中</button>
+                <button type="button" class="layui-btn">审核中</button>
+                <button type="button" class="layui-btn">已完结</button>
+                <button type="button" class="layui-btn">所有提案</button>
+                <button type="button" class="layui-btn">废弃提案</button>
+            </div>
+            <div>
+                <input placeholder="请输入标题"  id="titlesearch" value="" class="layui-input" style="width:300px">
+            </div>
+            <div class="layui-tab-content" style="padding: 20px 0;">
+                <div class="layui-tab-item layui-show">
+                    <ul class="mine-view jie-row" id="mytopicinfo"></ul>
+                </div>
+            </div>
+            <div id="pagetool"></div>
+        </div>
+    </div>
+
+
+@section scripts{
+    <script>
+        var element = layui.element;
+        var laypage = layui.laypage;
+
+        window.onload = function () {
+            loadData(1)  //请求数据
+            getPage(1)     //分页操作
+
+        }
+
+
+
+        var nowindex = 1;
+        var page = 1; //设置首页页码
+        var limit = 15;  //设置一页显示的条数
+        var total;    //总条数-暂时设置默认值为1页
+
+        $("#titlesearch").on('keydown', function () {
+            if (event.keyCode == 13) {
+                var sval = $("#titlesearch").val()
+                $("#titlesearch").val('')
+                 $("#btngroup").children().eq(3).addClass("layui-btn-danger").siblings().removeClass("layui-btn-danger");
+                loadData(4, sval)
+                getPage(4)
+            }
+        })
+
+
+        $("#btngroup button").on('click', function () {
+            nowindex = $(this).index() + 1;
+            $(this).addClass("layui-btn-danger").siblings().removeClass("layui-btn-danger");
+            loadData(nowindex)
+            getPage(nowindex)
+        })
+
+                function loadData(index,keyval='') {
+                    $.ajax({
+                        type: "post",
+                        url: "/WeChat/GetUserTRs",//对应controller的URL
+                        dataType: 'json',
+                        async:false,
+                        data: {
+                            "pageIndex": page,
+                            "pageSize": limit,
+                            "type": index,
+                            "skey":keyval
+                        },
+                        success: function (ret) {
+                            total = ret.total;  //设置总条数
+                            var data1 = ret.rows;
+                            var html = '';
+                            var typehtml = '';
+                                for (var i = 0; i < data1.length; i++) {
+                                    if (data1[i].Type == 1) { typehtml = '<span class="layui-badge layui-bg-gray">未派发</span><a href="javascript:void(0)" onclick="subgo(' + data1[i].Id + ')"><i class="layui-icon layui-icon-delete" style="font-size: 30px; color: #1E9FFF;"></i></a>'; }
+                                    if (data1[i].Type == 3) { typehtml = '<span class="layui-badge layui-bg-gray">管理员审核中</span>'; }
+                                    if (data1[i].Type == 2) { typehtml = '<span class="layui-badge layui-bg-gray">审核中</span>'; }
+                                    if (data1[i].Type == 4) { typehtml = '<span class="layui-badge layui-bg-red">实施中</span>'; }
+                                    if (data1[i].Type == 5) { typehtml = '<span class="layui-badge layui-bg-green">基地评分中</span>'; }
+                                    if (data1[i].Type == 7) { typehtml = '<span class="layui-badge layui-bg-green">总部打分中</span>'; }
+                                    if (data1[i].Type == 6) { typehtml = '<span class="layui-badge layui-bg-green">已完结</span>'; }
+                                     if (data1[i].Type == 11) { typehtml = '<span class="layui-badge layui-bg-black">已中止</span>'; }
+                                    if (data1[i].Type == 0) {
+                                        typehtml = '<span class="layui-badge layui-bg-black">已驳回</span><a href="javascript:void(0)" onclick="subgo(' + data1[i].Id + ')"><i class="layui-icon layui-icon-delete" style="font-size: 30px; color: #1E9FFF;"></i></a>'; }
+                                    html += '<li>';
+                                    html += '<a href="../Topic/Index/' + data1[i].Id + '">' + data1[i].Title + '</a>';
+                                    html += typehtml;
+                                    html += '<i>创建于' + data1[i].CreateOn+ '</i>';
+                                html += '<em>' + data1[i].ReplyCount + '参与</em>';
+                                html +='</li>'
+                               $("#mytopicinfo").empty().append(html);
+                            }
+                            
+                        }
+                    });
+        }
+
+        //删除按钮
+        function subgo(deid) {
+            layer.confirm('确定要删除么？', {
+                btn: ['确定', '取消'] //按钮
+            }, function (index) {
+                layer.close(index);
+                $.ajax({
+                    url: "/Topic/DeleteWet",
+                    data: { deleteid: deid },
+                    success: function (data) {
+                        //将data的json字符串转换成js对象
+                        var re = JSON.parse(data);
+                        if (re.success == true) {
+                            layer.msg(re.exinfo, {
+                                icon: 1
+                                , time: 1000
+                            }, function () {
+                                window.location.reload()
+                            });
+                        } else {
+                            layer.alert(re.exinfo);
+                        }
+                    }
+                })
+            }, function (index) {
+                layer.close(index);
+            });
+        }
+
+  function getPage(looks) {
+            layui.use('laypage', function () {
+                var laypage = layui.laypage;
+                var nowshows = looks
+                //执行一个laypage实例
+                laypage.render({
+                    elem: 'pagetool' //注意，这里的 test1 是 ID，不用加 # 号
+                    ,count: total, //数据总数，从服务端得到
+                    limit: limit,   //每页条数设置
+                    jump: function (obj, first) {
+                        page = obj.curr;  //改变当前页码
+                        limit = obj.limit;
+                        //首次不执行
+                       loadData(nowshows)  //加载数据
+                        
+                    }
+                });
+            });
+        }
+    </script>
+ }
+
+
+
+
+

@@ -1,0 +1,123 @@
+﻿
+@{
+    ViewData["Title"] = "TestAll";
+}
+<div style="margin:20px">
+    <span class="layui-breadcrumb">
+        <a href="">提案管理</a>
+        <a><cite>提案改善奖金报表</cite></a>
+    </span>
+    <div class="layui-form" lay-filter="rsform" style="margin-top:20px">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <div class="layui-input-inline">
+                    <input type="text" id="txt_search_title" placeholder="请输入标题" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="txt_search_startdate" placeholder="打分开始时间" autocomplete="off">
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="txt_search_enddate" placeholder="打分结束时间" autocomplete="off">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <button class="layui-btn" id="btn_query" data-type="reload">查询</button>
+            </div>
+        </div>
+    </div>
+
+    <table id="bonusreport" lay-filter="bonusreport"></table>
+ 
+</div>
+@section Scripts{
+    <script>
+                var laydate = layui.laydate;
+                var table = layui.table;
+            
+                 laydate.render({
+                    elem: '#txt_search_startdate'
+                 });
+                 laydate.render({
+                    elem: '#txt_search_enddate'
+                  });
+
+                var tableIns = table.render({
+                    elem: '#bonusreport'
+                    , url: '/Admin/Manage/GetBonusReport' //数据接口
+                    , page: true //开启分页
+                    , limit: 10 //每页显示行数
+                    , id: 'bonusreportid'
+                    , loading: true
+                    , toolbar: true //导出打印工具栏
+                    , limits: [10,50,100, 200, 300,500]
+                    , toolbar: true
+                    , cols: [[ //表头
+                           { field: 'Title', title: '提案名称', width: '24%' }
+                        , { field: 'FinishTime', title: '完结时间', width: '13%',templet: function (d) { return TimeFormat(d.FinishTime) }}
+                        , {
+                            field: 'TransDate', title: '打分时间', width: '13%',templet: function (d) { return TimeFormat(d.TransDate) }
+                        }
+                        , { field: 'Mark', title: '提案得分', width: '8%' }
+                        , { field: 'UserName', title: '工号', width: '8%' }
+                        , { field: 'RealName', title: '姓名', width: '8%' }
+                        , {
+                            field: 'Role', title: '角色', width: '10%',
+                             templet: function (d) {
+                                 if (d.Role == 1) { return "提案人" }
+                                 if (d.Role == 2) { return "实施人" }
+                                 if (d.Role == 3) {return "提案人/实施人"}
+                            }                                         
+                        }
+                        , {
+                            field: 'Ratio', title: '分配比例', width: '8%',templet: function (d) {
+                                 return d.Ratio+"%"
+                            }
+                            
+                        }
+                        , { field: 'Amount', title: '奖金', width: '8%', }
+                    ]]
+                });
+
+
+                $("#btn_query").on('click', function () {
+                    var title = $('#txt_search_title').val();
+                    var starttime = $('#txt_search_startdate').val();
+                    var endtime = $('#txt_search_enddate').val();
+                    table.reload('bonusreportid', {
+                        where: {
+                            title: title,
+                            starttime: starttime,
+                            endtime:endtime
+                        }
+                    });
+                });
+
+                 function TimeFormat(nfmtime) {
+                if (nfmtime == null || nfmtime == "" || nfmtime == undefined) {
+                    return "无";
+                } else {
+                    var datet = new Date(nfmtime);
+                    var o = {
+                        "M+": datet.getMonth() + 1,                 //月份
+                        "d+": datet.getDate(),                    //日
+                        "h+": datet.getHours(),                   //小时
+                        "m+": datet.getMinutes(),                 //分
+                        "s+": datet.getSeconds(),                 //秒
+                        "q+": Math.floor((datet.getMonth() + 3) / 3), //季度
+                        "S": datet.getMilliseconds()             //毫秒
+                    };
+                    var fmt = "yyyy-MM-dd hh:mm:ss";
+                    if (/(y+)/.test(fmt))
+                        fmt = fmt.replace(RegExp.$1, (datet.getFullYear() + "").substr(4 - RegExp.$1.length));
+                    for (var k in o)
+                        if (new RegExp("(" + k + ")").test(fmt))
+                            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                    return fmt;
+                }
+            }
+
+                 
+    </script>
+}

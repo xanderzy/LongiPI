@@ -1,0 +1,56 @@
+﻿
+@{
+    ViewData["Title"] = "提案改善";
+}
+<table id="markemail" lay-filter="markemail"></table>
+<script type="text/html" id="markemailbar">
+    <a class="layui-btn layui-btn-xs" lay-event="send">发送邮件提醒</a>
+</script>
+
+@section Scripts{
+    <script>
+        var table = layui.table;
+        table.render({
+            elem: '#markemail'
+            , url: '/Admin/Manage/MarkEmailDetail' //数据接口
+            , page: true //开启分页
+            , limit: 20 //每页显示行数
+            , id: 'markemailid'
+            , toolbar:true
+            , cols: [[ //表头
+                { field: 'Gid', title: '工号' }
+                ,{ field: 'Name', title: '姓名' }
+                , { field: 'EmailCount', title: '打分提案数量' }
+                , { fixed: 'right', title: '操作', toolbar: '#markemailbar', width: 270 }
+            ]]
+        });
+        //单元格编辑框  tool
+        table.on('tool(markemail)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'send') {
+                var ename = data.Name;
+                var eid = data.Gid;
+                var loading=layer.load();
+                $.ajax({
+                    url: "/Admin/Manage/SendMarkEmail",
+                    data: { emailuser: ename, euid: eid},
+                    success: function (data) {
+                        layer.close(loading);
+                        var re = JSON.parse(data);
+                        if (re.success == false) {
+                            layer.alert(re.exinfo);
+                        } else {
+                            layer.close(loading);
+                            obj.del();
+                            layer.msg(re.exinfo, {
+                                time: 1000
+                            });
+                        }
+                    }
+                })
+            }
+
+
+        })
+    </script>
+}

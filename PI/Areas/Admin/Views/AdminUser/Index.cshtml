@@ -1,0 +1,187 @@
+﻿
+@{
+    ViewData["Title"] = "用户管理";
+}
+<div style="margin:20px">
+    <span class="layui-breadcrumb">
+        <a href="">用户管理</a>
+        <a><cite>用户信息编辑</cite></a>
+    </span>
+    <div class="layui-form" style="margin-top:20px">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <div class="layui-input-inline">
+                    <input type="text" id="txt_search_name" placeholder="请输入姓名或工号" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <button class="layui-btn" id="btn_query1" data-type="reload">查询</button>
+            </div>
+        </div>
+    </div>
+    <table id="adminuserindex" lay-filter="lay-admin-edit"></table>
+    <div id='bindPage' style="display : none">
+        <div class="layui-form" lay-filter="layuiadmin-form-admin" style="padding: 20px 30px 0 0;">
+            <div class="layui-form-item">
+                <label class="layui-form-label">工号</label>
+                <div class="layui-input-block">
+                    <input type="text" name="UserName" lay-verify="required" autocomplete="off" class="layui-input" readonly="readonly">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">姓名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="RealName" lay-verify="required" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">邮箱</label>
+                <div class="layui-input-block">
+                    <input type="text" name="Email" lay-verify="email" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">部门</label>
+                <div class="layui-input-block">
+                    <select name="Department" class="layui-input" lay-verify="required">
+                        <option value="" selected></option>
+                        <option value="技术部">技术部</option>
+                        <option value="生产一组">生产一组</option>
+                        <option value="生产二组">生产二组</option>
+                        <option value="生产三组">生产三组</option>
+                        <option value="设备部">设备部</option>
+                        <option value="质量部">质量部</option>
+                        <option value="计划物控部">计划物控部</option>
+                        <option value="仓储物流部">仓储物流部</option>
+                        <option value="人力资源部">人力资源部</option>
+                        <option value="采购履行部">采购履行部</option>
+                        <option value="IE运营部">IE运营部</option>
+                        <option value="财务部">财务部</option>
+                        <option value="总经理办公室">总经理办公室</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item" style="margin-top:10px">
+                <label class="layui-form-label"></label>
+                <div class="layui-input-block">
+                    <input type="button" lay-submit lay-filter="LAY-user-edit-submit" id="editbtn" value="确认" class="layui-btn" style="display:none">
+                </div>
+            </div>
+        </div>
+    </div>
+<script type="text/html" id="userrbar">
+    <a class="layui-btn layui-btn-xs" lay-event="edituser">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="resetpass">重置密码</a>
+</script>
+</div>
+
+
+@section Scripts{
+    <script>
+        var table = layui.table;
+        var form = layui.form;
+        table.render({
+            elem: '#adminuserindex'
+            , url: '/Admin/AdminUser/GetUserIndex' //数据接口
+            , page: true //开启分页
+            , limit: 10 //每页显示行数
+            , id: 'layadminuser'
+            , cols: [[ //表头
+                , { field: 'UserName', title: '工号',width:'10%'}
+                , { field: 'RealName', title: '姓名' ,width:'10%'}
+                , { field: 'Department', title: '部门',width:'10%' }
+                , { field: 'Email', title: '邮箱',width:'10%' }
+                , { field: 'TopicCount', title: '提案数量' ,width:'10%'}
+                , { field: 'TopicReplyCount', title: '改善数量',width:'10%' }
+                , { field: 'CreateOn', title: '注册日期',width: '20%'}
+                , { title: '操作', toolbar: '#userrbar',width: '20%'}
+            ]]
+        });
+
+        var $ = layui.$, active = {
+            reload: function () {
+                var tusername = $('#txt_search_name');
+                table.reload('layadminuser', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    , where: {
+                        username: tusername.val()
+                    }
+                });
+            }
+        };
+        $("#btn_query1").on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        })
+
+        //单元格编辑框  tool
+        table.on('tool(lay-admin-edit)', function (obj) {
+            var layer = layui.layer;
+            var data = obj.data;
+            //console.log(obj)
+            if (obj.event === 'resetpass') {
+                //重置密码
+                $.ajax({
+                    type: "post",
+                    url: "/Admin/AdminUser/ResetPassword",//对应controller的URL
+                    data: { username: data.UserName },
+                    success: function (res) {
+                        var resobj = JSON.parse(res);
+                        layer.alert(resobj.msg);
+                    }
+                })
+            }
+            else if (obj.event === 'edituser') {
+                layer.open({
+                    type: 1,   // 6可以使表单超出部分不被遮挡
+                    title: '编辑人员信息',
+                    area: ['400px', '600'],
+                    btn: ['确认', '取消'],
+                    btnAlign: 'c',   // 按钮居中
+                    content: $('#bindPage').html(),
+                    success: function (layero, index) {
+                        form.render();
+                        form.val("layuiadmin-form-admin", {
+                            "UserName": data.UserName
+                            , "RealName": data.RealName
+                            , "Email": data.Email
+                            , "Department": data.Department
+                        });
+                        //form.render();    // 表单渲染
+                        form.on('submit(LAY-user-edit-submit)', function (data) {     // 打印data就可以看到form表单提交的数据
+                            var filed = data.field;
+                            if (filed.Email == "") { layer.msg("邮箱不能为空"); return false; }
+                            if (filed.Department == "") { layer.msg("车间不能为空"); return false; }
+                            if (filed.RealName == "") { layer.msg("姓名不能为空"); return false; }
+                            $.ajax({
+                                type: "post",
+                                url: "/Admin/AdminUser/UserEditSave",//对应controller的URL
+                                data: filed,
+                                success: function (data) {
+                                    var res = JSON.parse(data);
+                                    if (res.success) {
+                                        layer.msg("修改成功");
+                                        layer.close(index);
+                                        table.reload('layadminuser', {
+                                            page: { curr: 1 }
+                                        });
+                                    } else {
+                                        layer.msg("更新失败");
+                                    }
+                                }
+                            });
+                        });
+                    },
+                    yes: function (index, layero) {
+                        layero.find('#editbtn').click();    // 这一句就是点击确认按钮触发form的隐藏提交
+                    },
+                    btn2: function (index, layero) {
+                        layer.close(index);
+                    }
+                });
+            }
+        })
+    </script>
+}

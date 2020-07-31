@@ -1,0 +1,123 @@
+﻿@model ForgetViewModel
+@{
+    var list = ViewBag.User;
+    ViewData["Title"] = "基本设置";
+}
+<div class="layui-container fly-marginTop fly-user-main">
+    <ul class="layui-nav layui-nav-tree layui-inline" lay-filter="user"  style="z-index:1">
+        <li class="layui-nav-item">
+            <a asp-controller="User" asp-action="MyHome">
+                <i class="layui-icon">&#xe609;</i>
+                我的主页
+            </a>
+        </li>
+        <li class="layui-nav-item">
+            <a asp-controller="User" asp-action="MyTR">
+                <i class="layui-icon">&#xe612;</i>
+                用户中心
+            </a>
+        </li>
+        <li class="layui-nav-item  layui-this">
+            <a asp-controller="User" asp-action="UserInfo">
+                <i class="layui-icon">&#xe620;</i>
+                基本设置
+            </a>
+        </li>
+        <li class="layui-nav-item">
+            <a asp-controller="User" asp-action="MyCheck">
+                <i class="layui-icon">&#xe611;</i>
+                我的审核
+            </a>
+        </li>
+    </ul>
+
+    <div class="site-tree-mobile layui-hide">
+        <i class="layui-icon">&#xe602;</i>
+    </div>
+    <div class="site-mobile-shade"></div>
+
+    <div class="site-tree-mobile layui-hide">
+        <i class="layui-icon">&#xe602;</i>
+    </div>
+    <div class="site-mobile-shade"></div>
+
+
+    <div class="fly-panel fly-panel-user" pad20>
+        <div class="layui-tab layui-tab-brief" lay-filter="user">
+            <ul class="layui-tab-title" id="LAY_mine">
+                <li class="layui-this" lay-id="info">我的资料</li>
+                <li lay-id="pass">密码</li>
+            </ul>
+            <div class="layui-tab-content" style="padding: 20px 0;">
+                <div class="layui-form layui-form-pane layui-tab-item layui-show">
+                    <form method="post" asp-controller="User" asp-action="Edit">
+                        <div class="layui-form-item">
+                            <label for="L_UserName" class="layui-form-label">用户名</label>
+                            <div class="layui-input-inline">
+                                <input type="text" id="L_UserName" name="UserName" required autocomplete="off" value=@list.UserName class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label for="L_RealName" class="layui-form-label">姓名</label>
+                            <div class="layui-input-inline">
+                                <input type="text" id="L_RealName" name="RealName" required lay-verify="required" autocomplete="off" value=@list.RealName class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label for="L_Email" class="layui-form-label">邮箱</label>
+                            <div class="layui-input-inline">
+                                <input type="text" id="L_Email" name="Email" autocomplete="off" value=@list.Email class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label for="L_Department" class="layui-form-label">部门</label>
+                            <div class="layui-input-inline">
+                                <select id="L_Department" name="Department" class="layui-input">
+                                    <option value=@list.Department>@list.Department</option>
+                                    <option value="技术部">技术部</option>
+                                    <option value="生产一组">生产一组</option>
+                                    <option value="生产二组">生产二组</option>
+                                    <option value="生产三组">生产三组</option>
+                                    <option value="设备部">设备部</option>
+                                    <option value="动力部">动力部</option>
+                                    <option value="质量部">质量部</option>
+                                    <option value="计划物控部">计划物控部</option>
+                                    <option value="仓储物流部">仓储物流部</option>
+                                    <option value="人力资源部">人力资源部</option>
+                                    <option value="采购履行部">采购履行部</option>
+                                    <option value="IE运营部">IE运营部</option>
+                                    <option value="财务部">财务部</option>
+                                    <option value="总经理办公室">总经理办公室</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <button class="layui-btn" key="set-mine" lay-filter="*" lay-submit>确认修改</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="layui-form layui-form-pane layui-tab-item">
+                    <form method="post" asp-controller="Account" asp-action="ForgotPassword">
+                        <div class="layui-form-item">
+                            <label for="npassword" class="layui-form-label">新密码</label>
+                            <div class="layui-input-inline">
+                                <input type="password" id="npassword" asp-for="Password" required lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">6到16个字符</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label for="nconfirmPassword" class="layui-form-label">确认密码</label>
+                            <div class="layui-input-inline">
+                                <input type="password" asp-for="ConfirmPassword" id="nconfirmPassword" required lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <button class="layui-btn" lay-filter="*" id="passchangebtn" lay-submit>确认修改</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

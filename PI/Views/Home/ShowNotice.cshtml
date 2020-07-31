@@ -1,0 +1,48 @@
+﻿
+@{
+    var snt = ViewBag.ShowNotice as Topic;
+}
+
+<div class="layui-container">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md8 content detail">
+            <div class="fly-panel detail-box">
+                <h1>@snt.Title</h1>
+                <div class="detail-about">
+                    <a class="fly-avatar" href="../user/home.html">
+                        <img src="~/images/longi.png" alt="隆基">
+                    </a>
+                    <div class="fly-detail-user">
+                        <a href="#" class="fly-link">
+                            <cite>@snt.UserName</cite>
+                        </a>
+                    </div>
+                    <div class="detail-hits">
+                        <span>@snt.CreateOn</span>
+                    </div>
+                </div>
+
+                <div class="detail-body">
+                    @Html.Raw(snt.Content)
+                </div>
+            </div>
+            </div>
+            <div class="layui-col-md4">
+                <div class="fly-panel">
+                    <div class="fly-panel-title">
+                        提案改善系统操作手册
+                    </div>
+                    <div class="fly-panel-main">
+                        <a href="~/shouce/提案改善系统操作手册.pptx" target="_blank" class="fly-zanzhu" time-limit="2017.09.25-2099.01.01" style="background-color: #5FB878;">点击下载操作手册</a>
+                    </div>
+                </div>
+                <div class="fly-panel" style="padding: 20px 0; text-align: center;">
+                    <img src="~/images/xiaochengxu.png" style="max-width: 100%;" alt="提案改善">
+                    <p style="position: relative; color: #666;">提案改善微信小程序码-扫码进入</p>
+                </div>
+            </div>
+       
+    </div>
+</div>
+
+

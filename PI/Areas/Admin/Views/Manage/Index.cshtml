@@ -1,0 +1,276 @@
+﻿
+@{
+    ViewData["Title"] = "TestAll";
+}
+    <div style="margin:20px">
+        <span class="layui-breadcrumb">
+            <a href="">提案管理</a>
+            <a><cite>提案审核</cite></a>
+        </span>
+        <table id="adminpaifa" lay-filter="layadminpf"></table>
+        <script type="text/html" id="toolbarDemo">
+            <div class="layui-btn-container">
+                <button class="layui-btn layui-btn-sm" lay-event="add">批量派发</button>
+                <button class="layui-btn layui-btn-sm" lay-event="delete">批量驳回</button>
+            </div>
+        </script>
+        <script type="text/html" id="barDemo">
+            <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="look">查看</a>
+            <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="hide">驳回</a>
+            {{#  if(d.Type==2){ }}
+            <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="paifa">派发</a>
+            {{#  }else{ }}
+            <a class="layui-btn layui-btn-xs" lay-event="finishta">通过</a>
+            {{#  } }}
+        </script>
+    </div>
+
+@section Scripts{
+    <script>
+        var table = layui.table;
+        var lock='unlock'  //函数节流
+        var tableIns = table.render({
+            elem: '#adminpaifa'
+            , url: '/Admin/Manage/GetPaifaRpt' //数据接口
+            , page: true //开启分页
+            , limit: 10 //每页显示行数
+            , id: 'mychecktableid'
+            , toolbar: '#toolbarDemo'
+            , cols: [[ //表头
+                { field: 'UserName', title: '工号', width: '20%' }
+                , {
+                    field: 'Type', title: '状态', width: '10%', templet: function (d) {
+                        if (d.Type == 2) { return "未实施" }
+                        if (d.Type == 3) { return "已实施" }
+                    }
+                }
+                , {
+                    field: 'CreateOn', title: '发布日期', width: '20%',
+                    templet: function (d) {
+                        var datet = new Date(d.CreateOn);
+                        var o = {
+                            "M+": datet.getMonth() + 1,                 //月份
+                            "d+": datet.getDate(),                    //日
+                            "h+": datet.getHours(),                   //小时
+                            "m+": datet.getMinutes(),                 //分
+                            "s+": datet.getSeconds(),                 //秒
+                            "q+": Math.floor((datet.getMonth() + 3) / 3), //季度
+                            "S": datet.getMilliseconds()             //毫秒
+                        };
+                        var fmt = "yyyy-MM-dd hh:mm:ss";
+                        if (/(y+)/.test(fmt))
+                            fmt = fmt.replace(RegExp.$1, (datet.getFullYear() + "").substr(4 - RegExp.$1.length));
+                        for (var k in o)
+                            if (new RegExp("(" + k + ")").test(fmt))
+                                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                        return fmt;
+                    }
+                }
+                , {
+                    field: 'Title', title: '标题', width: '30%', templet: function (d) {
+                        return '<a href="/Topic/Index/' + d.Id + '"' + ' class="layui-table-link">' + d.Title + '</a>';
+                    }
+                }
+                , { fixed: 'right', title: '操作', toolbar: '#barDemo', width: '20%' }
+            ]]
+        });
+
+        //头部事件 toolbar
+        var layer = layui.layer;
+        table.on('toolbar(layadminpf)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch (obj.event) {
+                case 'add':
+                    layer.msg('没时间写了,先直接预留按钮在这里');
+                    break;
+                case 'delete':
+                    layer.msg('没时间写了,先直接预留按钮在这里');
+                    break;
+            };
+        })
+
+        //单元格编辑框  tool
+        table.on('tool(layadminpf)', function (obj) {
+            if (lock == 'lock') {
+                return false
+            }
+            var data = obj.data;
+            //console.log(obj)
+            if (obj.event === 'hide') {
+                var hid = data.Id;
+                layer.confirm('确认驳回么？', {
+                    btn: ['确定', '取消'] //按钮
+                }, function (index) {
+                    layer.close(index);
+                    layer.prompt({
+                        formType: 0,
+                        value: '',
+                        title: '请输入驳回理由',
+                    }, function (value, index, elem) {
+                         lock='lock'
+                        $.ajax({
+                            url: "/Topic/HideTopic",
+                            data: { htid: hid, hidereason: value,opeuser:'admin'},
+                            success: function (data) {
+                                var re = JSON.parse(data);
+                                 lock='unlock'
+                                if (re.success == false) {
+                                    layer.msg(re.exinfo, {
+                                        time: 2000
+                                    });
+                                } else {
+                                    layer.close(index);
+                                    layer.msg(re.exinfo, {
+                                        time: 1000
+                                    });
+                                     tableIns.reload({
+                                     page: {
+                                        curr: 1
+                                    }
+                                   });
+                                }
+                            }
+                        })
+                    })
+                }, function (index) {
+                    layer.close(index);
+                });
+            }
+            else if (obj.event === 'look') {
+                var showfirsthtml = '<div id="showdetail" class="site-content" style="padding:20px">' +
+                    '<div class="site-title">' +
+                    ' <h1>' + obj.data.Title + '</h1> ' +
+                    '<div>' +
+                    '<blockquote class="layui-elem-quote">' +
+                    obj.data.UserName + '-' + obj.data.RealName + '-' + obj.data.Department +
+                    '<p>发布于' + obj.data.CreateOn + '</p>' +
+                    '</blockquote>' +
+                    '</div class="site-text">' +
+                    '<div class="layui-field-box">' +
+                    '<h2 style="color:gray">提案背景</h2> <hr>' +
+                    obj.data.Content +
+                    '<br/><h2 style="color:gray">建议改善</h2><hr>' +
+                    obj.data.Suggest + '<br/>';
+                if (obj.data.HasUpload == "0") {
+                    showfirsthtml = showfirsthtml + '</div>' + '</div>';
+                    layer.open({
+                                type: 1,
+                                title: false,
+                                closeBtn: 0,
+                                shadeClose: true,
+                                area: ['700px', '400px'],
+                                content: showfirsthtml
+                            })
+                }
+                else {
+                    $.ajax({
+                        url: "/Tool/GetFileInfo",
+                        data: { filehasupload: obj.data.HasUpload },
+                        success: function (data) {
+                            var resobj = JSON.parse(data)
+                            if (resobj.code == 0) {
+                                var filelist = "";
+                                for (var l = 0; l < resobj.data.length; l++) {
+                                    var filestring = '<a href="/Tool/Download?fiid=' + resobj.data[l].Id + '" style="color:blue">' + resobj.data[l].FileName + '</a><br/>';
+                                    if (filelist == "") {
+                                        filelist = filestring
+                                    } else {
+                                        filelist =filelist+filestring
+                                    }
+                                }
+                                showfirsthtml = showfirsthtml +
+                                    '<h2 style="color:gray">附件下载</h2><hr>' +
+                                    filelist
+                                    + '</div>' + '</div>';
+                            } else {
+                                showfirsthtml = showfirsthtml +
+                                    '<h2 style="color:gray">附件下载</h2><hr>' +
+                                    '<p>文件数据读取失败，请联系开发人员！！！</p>'
+                                    + '</div>' + '</div>';
+                            }
+                            layer.open({
+                                type: 1,
+                                title: false,
+                                closeBtn: 0,
+                                shadeClose: true,
+                                area: ['700px', '400px'],
+                                content: showfirsthtml
+                            })
+                        }
+                    })
+
+                }
+
+            } else if (obj.event === 'finishta') {
+                if (data.Type == 2) {
+                    layer.alert("未实施提案需要派发！")
+                    return false
+                }
+                var did = data.Id;
+                var transby = "Admin"
+                layer.confirm('是否确认通过此提案', {
+                    btn: ['确认', '取消'] //按钮
+                }, function (index) {
+                         lock='lock'
+                    $.ajax({
+                        type: "POST",
+                        url: "/Topic/FinishTa",
+                        data: { wid: did, transby: transby, wfileid: "0" },
+                        success: function (data) {
+                            var roj = JSON.parse(data);
+                             lock='unlock'
+                            if (roj.success) {
+                                layer.msg("提案通过成功")
+                                tableIns.reload({
+                                    page: {
+                                        curr: 1 //重新从第 1 页开始
+                                    }
+                                });
+                            } else {
+                                layer.alert(roj.exinfo)
+                            }
+                        }
+                    });
+                }, function (index) {
+                    layer.close(index);
+                });
+
+            } else if (obj.event === 'paifa') {
+                if (data.Type == 3) {
+                    layer.alert("已实施提案需审核通过！")
+                    return false
+                }
+                var pfid = data.Id;
+                layer.prompt({
+                    formType: 0,
+                    value: '',
+                    title: '请输入审核人姓名',
+                }, function (value, index, elem) {
+                     lock='lock'
+                    $.ajax({
+                        url: "/Admin/Manage/DistributeTeamLeader",
+                        data: { TopicId: pfid, TeamLeader: value },
+                        success: function (data) {
+                            var re = JSON.parse(data);
+                             lock='unlock'
+                            if (re.success == false) {
+                                layer.close(index);
+                                layer.alert(re.exinfo)
+                            } else {
+                                layer.close(index);
+                                layer.msg(re.exinfo, {
+                                    time: 2000
+                                });
+                                tableIns.reload({
+                                    page: {
+                                        curr: 1
+                                    }
+                                });
+                            }
+                        }
+                    })
+                })
+            }
+        })
+    </script>
+}

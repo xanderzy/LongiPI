@@ -1,0 +1,183 @@
+﻿@{
+    var list = ViewBag.Topics as List<TopicViewModel>;
+    var user = ViewBag.User as User;
+    var gnt= ViewBag.GNotice as NoticeViewModel;
+    var unt = ViewBag.UNotice as List<NoticeViewModel>;
+}
+    <div class="layui-container">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md8">
+                @if (gnt != null)
+                {
+                    <div class="fly-panel">
+                        <div class="fly-panel-title fly-filter">
+                            <a>置顶</a>
+                        </div>
+                        <ul class="fly-list">
+                            <li>
+                                <a href="#" class="fly-avatar">
+                                    <img src="~/images/adminavart.jpg" alt="管理员">
+                                </a>
+                                <h2>
+                                    <a class="layui-badge">公告</a>
+                                    <a asp-controller="Home" asp-action="ShowNotice" asp-route-id="@gnt.Id" asp-route-nodeid="5">@gnt.Title</a>
+                                </h2>
+                                <div class="fly-list-info">
+                                    <a href="#" link>
+                                        <cite>@gnt.UserName</cite>
+                                    </a>
+                                    <span>@gnt.CreateOn</span>
+                                </div>
+                                <div class="fly-list-badge">
+                                </div>
+                            </li>
+                        </ul>
+                    </div>}
+
+                <div class="fly-panel" style="margin-bottom: 0;">
+                    <div class="fly-panel-title fly-filter">
+                        <a asp-controller="Home" asp-action="Index" asp-route-looks="check">审核中</a>
+                        <span class="fly-mid"></span>
+                        <a asp-controller="Home" asp-action="Index" asp-route-looks="good">实施中</a>
+                        <span class="fly-mid"></span>
+                        <a asp-controller="Home" asp-action="Index" asp-route-looks="perfect">已完结</a>
+                    </div>
+                    <ul class="fly-list">
+                        @foreach (var item in list)
+                        {
+                            <li>
+                                <a href="#" class="fly-avatar">
+                                    <img src="~/images/longi.png" alt="提案">
+                                </a>
+                                <div>
+                                    <a asp-controller="Topic" asp-action="Index" asp-route-id="@item.Id" style="font-size:medium">@item.Title</a>
+                                    @if (item.Type == TopicType.Normal)
+                                    {<span class="layui-badge layui-bg-gray">未审核</span>}
+                                    @if (item.Type == TopicType.Good)
+                                    {<span class="layui-badge layui-bg-red">实施中</span>}
+                                    @if (item.Type == TopicType.Top)
+                                    {<span class="layui-badge layui-bg-green">未打分</span>}
+                                    @if (item.Type == TopicType.Marking)
+                                    {<span class="layui-badge layui-bg-green">评分中</span>}
+                                    @if (item.Type == TopicType.Perfect)
+                                    {<span class="layui-badge layui-bg-green">已完结</span>}
+                                    @if (item.Type == TopicType.TeamLeaderCheck||item.Type==TopicType.AdminCheck)
+                                    {<span class="layui-badge layui-bg-blue">审核中</span>}
+                                    @if (item.Type == TopicType.Delete)
+                                    {<span class="layui-badge layui-bg-black">已驳回</span>}
+                                    @if (item.Type == TopicType.Perfect)
+                                    {
+                                        {<span class="layui-badge layui-bg-orange">@item.TopicMark 分</span>}
+                                }
+                                </div>
+                                <div class="fly-list-info">
+                                    <a href="#" link>
+                                        <cite>@item.UserName-@item.RealName-@item.Department</cite>
+                                    </a>
+                                    <span>@item.CreateOn &nbsp; @item.NodeName</span>
+                                    <span class="fly-list-nums">
+                                        <i class="layui-icon layui-icon-reply-fill" title="参与人数"></i>@item.ReplyCount
+                                    </span>
+                                </div>
+                                <div class="fly-list-badge">
+
+                                </div>
+                            </li>}
+                    </ul>
+                    @if (list.Count() == 10)
+                    {
+                        <div style="text-align: center">
+                            <div class="laypage-main">
+                                <a asp-controller="Home" asp-action="AllTopics" class="laypage-next">查看所有提案</a>
+                            </div>
+                        </div>}
+                </div>
+            </div>
+            <div class="layui-col-md4">
+
+                <div class="fly-panel">
+                    <h3 class="fly-panel-title">更新日志</h3>
+
+                    <ul class="fly-panel-main fly-list-static">
+                        @if (unt.Count() == 0)
+                        {
+                            <li>暂无数据</li>
+                        }
+                        else
+                        {
+                            @foreach (var uitem in unt)
+                            {
+                                <li>
+                                    <a asp-controller="Home" asp-action="ShowNotice" asp-route-id="@uitem.Id">@uitem.Title</a>
+                                </li>
+                            }}
+                    </ul>
+                </div>
+                <div class="fly-panel" style="padding: 20px 0; text-align: center;">
+                    <img src="~/images/xiaochengxu.png" style="max-width: 100%;" alt="提案改善">
+                    <p style="position: relative; color: #666;">提案改善微信小程序码-扫码进入</p>
+                </div>
+                <div class="fly-panel">
+                    <div class="fly-panel-title">
+                        提案改善系统文档
+                    </div>
+                    <div class="fly-panel-main">
+                        <a href="~/shouce/提案改善系统操作手册.pptx" target="_blank" class="fly-zanzhu" style="background-color: #5FB878;">系统操作手册下载</a>
+                        <a href="~/shouce/项目结案报告.docx" target="_blank" class="fly-zanzhu" style="background-color: #5FB878;">提案改善完结报告模板-WORD版</a>
+                        <a href="~/shouce/管理类提案改善报告模板.pptx" target="_blank" class="fly-zanzhu" style="background-color: #5FB878;">提案改善完结报告模板管理类-PPT版</a>
+                        <a href="~/shouce/技术类提案改善报告模板.pptx" target="_blank" class="fly-zanzhu" style="background-color: #5FB878;">提案改善完结报告模板技术类-PPT版</a>
+                    </div>
+                </div>
+
+
+                <div class="fly-panel fly-signin">
+
+                    <div class="fly-panel-title">批量导入  <i class="fly-mid"></i> </div>
+                    @if (user is null)
+                    {
+                        <div class="fly-panel-main fly-signin-main">
+                            <span>登陆以后才能进行批量导入</span>
+                        </div>}
+                    else
+                    {
+                        <div class="fly-panel-main fly-signin-main">
+                            <button class="layui-btn layui-btn-danger" id="TMFileUpload" data-username="@user.UserName">批量导入</button>
+                            <p><a href="~/shouce/提案批量导入模板.xlsx" style="color:dodgerblue">点击下载批量导入模板</a></p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+@section Scripts{ 
+    <script>
+        var upload = layui.upload;
+        var layer = layui.layer;
+        var uploader = $("#TMFileUpload").data("username");
+        //执行实例
+        var uploadInst = upload.render({
+            elem: '#TMFileUpload' //绑定元素
+            , url: '/Home/TMFileImport' //上传接口
+            , data: { uploaduser: uploader }
+            , size: 5120
+            , accept: "file"
+            , multiple: false
+            ,before: function (obj) { //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
+               layer.load(); //上传loading
+            }
+            , done: function (res) {
+                layer.closeAll('loading');
+                if (res.Success) {
+                    layer.alert("批量导入提案成功，请刷新后查看");
+                } else {
+                    layer.alert(res.exinfo);
+                }
+            }
+            , error: function () {
+                layer.msg("上传组件异常-请联系管理员！");
+            }
+        });
+
+
+    </script>
+}

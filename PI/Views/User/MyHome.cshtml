@@ -1,0 +1,77 @@
+﻿
+@{
+    var rtm = ViewBag.RTopics as List<SimpleTopic>;
+    var rrt = ViewBag.RsReplys as List<SimpleTopic>;
+    var mui = ViewBag.User as User;
+}
+
+<div class="fly-home fly-panel" style="background-image: url(../../images/lunbo.jpg);">
+    <img src="~/images/longi.png" alt="隆基">
+    <h1 style="color:white">
+         @mui.RealName
+    </h1>
+
+    <p style="padding: 10px 0; color: #5FB878;">部门：@mui.Department</p>
+
+    <p class="fly-home-info">
+        <i class="iconfont icon-shijian"></i><span>@mui.CreateOn 加入</span>
+    </p>
+
+    <div class="fly-sns" data-user="">
+        <a href="javascript:;" class="layui-btn layui-btn-primary fly-imActive">提案数量 @mui.TopicCount 个</a>
+        <a href="javascript:;" class="layui-btn layui-btn-primary fly-imActive">改善数量 @mui.TopicReplyCount 个</a>
+    </div>
+
+</div>
+
+<div class="layui-container">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md6 fly-home-jie">
+            <div class="fly-panel">
+                <h3 class="fly-panel-title">发布的提案(只显示最近十个)</h3>
+                @if (rtm.Count() == 0)
+                {
+                    <div class="fly-none" style="min-height: 50px; padding:30px 0; height:auto;"><i style="font-size:14px;">未发布任何提案</i></div>
+                }
+                else
+                {
+                    <ul class="jie-row">
+                        @foreach (var aa in rtm)
+                        {
+
+                            <li>
+                                <a href="/Topic/Index/@aa.Id"   class="jie-title">@aa.Title</a>
+                                <i>发布于 @aa.CreateOn</i>
+                            </li>
+
+                        }
+                    </ul>
+                        }
+                    </div>
+        </div>
+
+        <div class="layui-col-md6 fly-home-jie">
+            <div class="fly-panel">
+                <h3 class="fly-panel-title">实施中的提案(只显示最近十个)</h3>
+                @if (rrt.Count() == 0)
+                {
+                    <div class="fly-none" style="min-height: 50px; padding:30px 0; height:auto;"><i style="font-size:14px;">未实施任何提案</i></div>
+                }
+                else
+                {
+                    <ul class="jie-row">
+                        @foreach (var bb in rrt)
+                        {
+
+                            <li>
+                                <a href="/Topic/Index/@bb.Id" class="jie-title">@bb.Title</a>
+                                <i>实施于 @bb.CreateOn</i>
+                            </li>
+
+                        }
+                    </ul>
+                        }
+                    </div>
+        </div>
+    </div>
+</div>

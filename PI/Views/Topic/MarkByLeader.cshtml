@@ -1,0 +1,569 @@
+﻿@model Topic
+@{
+    ViewData["Title"] = Model.Title;
+    var mffilelist = ViewBag.MFFiles as List<MyFile>;
+    var mwfilelist = ViewBag.MWFiles as List<MyFile>;
+}
+<div class="layui-container">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md5 fly-home-jie">
+
+            <div class="fly-panel" style="padding:20px">
+                @if (Model.Node.Name == "技术类")
+                {
+                    <h1 class="fly-panel-title">技术类提案评分</h1>
+                    <form class="layui-form" id="jsmarkform">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">收益</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="shouyi" required lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">30%</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">推广度</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="tuiguang" required lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">20%</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">创新性</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="chuangxin" required lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">20%</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">品质</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="pinzhi" required lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">15%</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">EHS贡献</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="ehs" required lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">10%</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">报告制作</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="baogao" required lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">5%</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <input type="button" class="layui-btn" data-id="@Model.Id" id="jstaid" value="提交分数" />
+                            </div>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <h1 class="fly-panel-title">管理类提案评分</h1>
+                    <form class="layui-form" id="glmarkform">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">满意度</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="manyi" required lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">30%</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">推广度</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="gtuiguang" required lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">25%</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">创新性</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="gchuangxin" required lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">20%</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">成本贡献</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="chengben" required lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">20%</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">报告制作</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="gbaogao" required lay-verify="required" autocomplete="off" class="layui-input">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">5%</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <input type="button" class="layui-btn" data-id="@Model.Id" id="gltaid" value="提交分数" />
+                            </div>
+                        </div>
+                    </form>
+                }
+            </div>
+
+            <div class="fly-panel" style="padding:20px">
+                <h1>@Model.Title</h1>
+                <div class="fly-detail-info">
+                    <span class="layui-badge layui-bg-green fly-detail-column">@Model.Node.Name</span>
+                    <span class="fly-list-nums">
+                        <a href="#comment"><i class="iconfont" title="改善人数">&#xe60c;</i>@Model.ReplyCount</a>
+                    </span>
+                </div>
+                <!--<div class="detail-about">
+            <a class="fly-avatar" href="#">
+                <img src="~/images/longi.png" alt="隆基">
+            </a>
+            <div class="fly-detail-user">
+                <a href="#" class="fly-link">
+                    <cite>Model.UserName-Model.User.RealName</cite>
+                    <i class="layui-badge fly-badge-vip">Model.User.Department</i>
+                </a>
+            </div>
+            <div class="detail-hits">
+                <span>Model.CreateOn</span>
+            </div>
+        </div>
+
+        <div class="detail-body photos">
+            <h3 style="color:gray">提案背景</h3> <hr>
+            Html.Raw(Model.Content)<br /><br />
+            <h3 style="color:gray">建议改善</h3><hr>
+            Html.Raw(Model.Suggest)<br /><br />
+        -->
+                <div class="detail-body photos">
+                    @if (Model.HasUpload != "0")
+                    {
+                        if (mffilelist.Count > 0)
+                        {
+                            <h3 style="color:gray">提案附件</h3><hr>
+                            @for (int i = 0; i < mffilelist.Count; i++)
+                            {
+                                var ffile = mffilelist[i];
+                                <p><i class="layui-icon layui-icon-link"></i><a asp-controller="Tool" asp-action="DownLoad" asp-route-fiid="@ffile.Id">@ffile.FileName@ffile.FileExt</a></p>
+                            }
+                        }
+                        if (mwfilelist.Count > 0)
+                        {
+                            <h3 style="color:gray">完结报告</h3><hr>
+                            @for (int i = 0; i < mwfilelist.Count; i++)
+                            {
+                                var wfile = mwfilelist[i];
+                                <p><i class="layui-icon layui-icon-link"></i><a asp-controller="Tool" asp-action="DownLoad" asp-route-fiid="@wfile.Id">@wfile.FileName@wfile.FileExt</a></p>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+            <!--<div class="fly-panel detail-box" id="flyReply">
+        <fieldset class="layui-elem-field layui-field-title" style="text-align: center;">
+           <legend>改善人员</legend>
+        </fieldset>
+
+        <ul class="jieda" id="jieda">
+            for (int j = 0;j < wrlist.Count; j++)
+            {
+                var item = wrlist[j];
+                <li data-id="111" class="jieda-daan">
+                    <a name="item-4444"></a>
+                    <div class="detail-about detail-about-reply">
+                        <a class="fly-avatar" href="">
+                            <img src="~/images/longi.png" alt="隆基">
+                        </a>
+                        <div class="fly-detail-user">
+                            <a href="" class="fly-link">
+                                <cite>item.ReplyUser.UserName-item.ReplyUser.RealName</cite>
+                                <i class="iconfont icon-renzheng"></i>
+                                <i class="layui-badge fly-badge-vip">item.ReplyUser.Department</i>
+                            </a>
+                        </div>
+                        <div class="detail-hits">
+                            <span>item.CreateOn</span>
+                        </div>
+                    </div>
+                    <div class="detail-body jieda-body photos">
+                        Html.Raw(item.ReplyContent)
+                    </div>
+                </li>}
+        </ul>
+    </div>-->
+        </div>
+
+        <div class="layui-col-md7 fly-home-da">
+            <div class="fly-panel">
+                @if (Model.Node.Name == "技术类")
+                {
+                    <table border="1" align="center" style="width: 100%; height: 100%; table-layout: fixed; word-break: break-all;">
+                        <colgroup>
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 16%" />
+                            <col style="width: 16%" />
+                            <col style="width: 16%" />
+                            <col style="width: 16%" />
+                            <col style="width: 16%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>评价项目</th>
+                                <th>权重</th>
+                                <th colspan="5">评分标准</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="width: 100%;" align="center">
+                                <td rowspan="2">收益</td>
+                                <td rowspan="2">30%</td>
+                                <td>0-6</td>
+                                <td>7-12</td>
+                                <td>13-18</td>
+                                <td>19-24</td>
+                                <td>25-30</td>
+                            </tr>
+                            <tr style="width: 100%; height: 30px;" align="left">
+                                <td>小于1万元/月</td>
+                                <td>1～5万元/月</td>
+                                <td>5～10万元/月</td>
+                                <td>10～50万元/月</td>
+                                <td>大于50万元/月</td>
+                            </tr>
+                            <tr style="width: 100%;" align="center">
+                                <td rowspan="2">推广度</td>
+                                <td rowspan="2">20%</td>
+                                <td>0-4</td>
+                                <td>5-8</td>
+                                <td>9-12</td>
+                                <td>13-16</td>
+                                <td>17-20</td>
+                            </tr>
+                            <tr style="width: 100%; height: 40px;" align="left">
+                                <td>推广很少或没有推广。</td>
+                                <td>在本部门内有所推广。</td>
+                                <td>在所属生产基地部分推广，涉及部分相关设备或工序。</td>
+                                <td>在所属生产基地推广，涉及所有相关设备或工序。</td>
+                                <td>在全中心推广，涉及所有相关设备或工序。</td>
+                            </tr>
+                            <tr style="width: 100%;" align="center">
+                                <td rowspan="2">创新性</td>
+                                <td rowspan="2">20%</td>
+                                <td>0-4</td>
+                                <td>5-8</td>
+                                <td>9-12</td>
+                                <td>13-16</td>
+                                <td>17-20</td>
+                            </tr>
+                            <tr style="width: 100%; height: 40px;" align="left">
+                                <td>模仿，借鉴之作，缺乏创新性。</td>
+                                <td>创意从借鉴而来，但亦有自己的创新之处。</td>
+                                <td>独立创意，但新颖性一般。</td>
+                                <td>独自思考所提出的创意，思维及创意突破常规。</td>
+                                <td>独具创造性，本行业中首创。</td>
+                            </tr>
+                            <tr style="width: 100%;" align="center">
+                                <td rowspan="2">品质</td>
+                                <td rowspan="2">15%</td>
+                                <td>0-3</td>
+                                <td>4-6</td>
+                                <td>7-10</td>
+                                <td>11-13</td>
+                                <td>13-15</td>
+                            </tr>
+                            <tr style="width: 100%; height: 50px;" align="left">
+                                <td>对品质改善效果不明显。</td>
+                                <td>对品质有一定的改善，不良率下降。</td>
+                                <td>对品质有改善，或解决了一般的质量问题；或对销售有一定的促进作用；或产品抽检量有减少。</td>
+                                <td>对品质有明显改善，或解决了重要质量问题；或对销售有明显的促进作用；或品检工作大大减少。</td>
+                                <td>对品质有显著改善，或解决了重大质量问题；或对销售十分有利；或品质有保证，可作到免检。</td>
+                            </tr>
+                            <tr style="width: 100%;" align="center">
+                                <td rowspan="2">EHS</td>
+                                <td rowspan="2">10%</td>
+                                <td>0-2</td>
+                                <td>3-4</td>
+                                <td>5-6</td>
+                                <td>7-8</td>
+                                <td>9-10</td>
+                            </tr>
+                            <tr style="width: 100%; height: 50px;" align="left">
+                                <td>对环境、健康、安全等作用不明显，或无关。</td>
+                                <td>对提升工作环境质量、减轻疲劳程度、消除安全隐患，有少量的作用。</td>
+                                <td>对提升工作环境质量、减轻疲劳程度、消除安全隐患，有一定的作用。</td>
+                                <td>对提升工作环境质量、减轻疲劳程度、消除安全隐患，有明显作用。</td>
+                                <td>对提升工作环境质量、减轻疲劳程度、消除安全隐患，有显著作用，并解决了遗留的重大问题。</td>
+                            </tr>
+                            <tr style="width: 100%;" align="center">
+                                <td rowspan="2">报告制作</td>
+                                <td rowspan="2">5%</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                                <td>5</td>
+                            </tr>
+                            <tr style="width: 100%; height: 50px;" align="left">
+                                <td>报告繁琐，汇报不清晰；时间控制很不好；回答问题有遗漏。</td>
+                                <td>报告不够清晰，汇报不够流利；时间控制不好；回答问题不准确。</td>
+                                <td>报告外观一般，汇报基本清楚；时间控制略有超时；回答问题略差。</td>
+                                <td>报告表达基本清楚，汇报基本清晰；时间控制合理；回答问题准确。</td>
+                                <td>报告简洁、美观，汇报清晰流利；时间控制合理；回答问题准确、快捷。 </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <blockquote class="layui-elem-quote">
+                        <p>
+                            备注：上表中的收益，包括但不限于以下几个方面。<br/>
+                            1）增加产能；<br />
+                            2）减少工时；<br />
+                            3）人员精简；<br />
+                            4）降低材料消耗，包括主辅材料及水电气消耗；<br />
+                            5）减少固定资产投资，包含但不限于设备采购及厂房空间节约；<br />
+                            6）维修费用降低。<br />
+                            注：其中的收益都按照工厂1GW的产能进行计算。
+                        </p>
+                    </blockquote>
+                }
+                else
+                {
+                    <table border="1" align="center" style="width: 100%; height: 100%; table-layout: fixed; word-break: break-all;">
+                        <colgroup>
+                            <col style="width: 10%" />
+                            <col style="width: 10%" />
+                            <col style="width: 16%" />
+                            <col style="width: 16%" />
+                            <col style="width: 16%" />
+                            <col style="width: 16%" />
+                            <col style="width: 16%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>评价项目</th>
+                                <th>权重</th>
+                                <th colspan="5">评分标准</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="width: 100%;" align="center">
+                                <td rowspan="3">满意度</td>
+                                <td rowspan="3">30%</td>
+                                <td>0-6</td>
+                                <td>7-12</td>
+                                <td>13-18</td>
+                                <td>19-24</td>
+                                <td>25-30</td>
+                            </tr>
+                            <tr style="width: 100%; height: 40px;" align="left">
+                                <td>在实施过程中对满意度进行测评，结果不满意</td>
+                                <td>在实施过程中对满意度进行测评，结果比较满意</td>
+                                <td>在实施过程中对满意度进行测评，结果满意</td>
+                                <td>在实施过程中对满意度进行测评，结果很满意</td>
+                                <td>在实施过程中对满意度进行测评，结果特别满意</td>
+                            </tr>
+                            <tr><td colspan="5">对管理或服务类提案改善所涉及到的人员进行满意度测评</td></tr>
+                            <tr style="width: 100%;" align="center">
+                                <td rowspan="2">推广度</td>
+                                <td rowspan="2">25%</td>
+                                <td>0-5</td>
+                                <td>6-10</td>
+                                <td>11-15</td>
+                                <td>16-20</td>
+                                <td>21-25</td>
+                            </tr>
+                            <tr style="width: 100%; height: 40px;" align="left">
+                                <td>推广很少或没有推广。</td>
+                                <td>在较小范围内有所推广。</td>
+                                <td>在所属生产基地部分推广。</td>
+                                <td>在所属生产基地推广。</td>
+                                <td>在全集团推广。</td>
+                            </tr>
+                            <tr style="width: 100%;" align="center">
+                                <td rowspan="2">创新性</td>
+                                <td rowspan="2">20%</td>
+                                <td>0-4</td>
+                                <td>5-8</td>
+                                <td>9-12</td>
+                                <td>13-16</td>
+                                <td>17-20</td>
+                            </tr>
+                            <tr style="width: 100%; height: 40px;" align="left">
+                                <td>模仿，借鉴之作，缺乏创新性。</td>
+                                <td>创意从借鉴而来，但亦有自己的创新之处。</td>
+                                <td>独立创意，但新颖性一般。</td>
+                                <td>独自思考所提出的创意，思维及创意突破常规。</td>
+                                <td>独具创造性，本行业中首创。</td>
+                            </tr>
+
+                            <tr style="width: 100%;" align="center">
+                                <td rowspan="3">成本贡献</td>
+                                <td rowspan="3">20%</td>
+                                <td>0-4</td>
+                                <td>5-8</td>
+                                <td>9-12</td>
+                                <td>13-16</td>
+                                <td>17-20</td>
+                            </tr>
+                            <tr style="width: 100%; height: 40px;" align="left">
+                                <td>对人力、管理成本等无贡献，无法提升工作效率。</td>
+                                <td>可降低人力、管理成本1万元/月以内。</td>
+                                <td>对人力、管理成本等贡献在1～3万元/月。</td>
+                                <td>对人力、管理成本等成本贡献在3～5万元/月。</td>
+                                <td>对人力、管理成本贡献在5～10万元/月以上。</td>
+                            </tr>
+                            <tr><td colspan="5">在各评分区间内，可按收益金额比例计算得分</td></tr>
+                            <tr style="width: 100%;" align="center">
+                                <td rowspan="2">报告制作</td>
+                                <td rowspan="2">5%</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                                <td>5</td>
+                            </tr>
+                            <tr style="width: 100%; height: 50px;" align="left">
+                                <td>报告繁琐，汇报不清晰；时间控制很不好；回答问题有遗漏。</td>
+                                <td>报告不够清晰，汇报不够流利；时间控制不好；回答问题不准确。</td>
+                                <td>报告外观一般，汇报基本清楚；时间控制略有超时；回答问题略差。</td>
+                                <td>报告表达基本清楚，汇报基本清晰；时间控制合理；回答问题准确。</td>
+                                <td>报告简洁、美观，汇报清晰流利；时间控制合理；回答问题准确、快捷。 </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script>
+        var layer = layui.layer;
+        var table = layui.table;
+        var form = layui.form;
+
+        var reg30 = new RegExp("^([12][0-9]|30|[0-9])$");
+        var reg20 = new RegExp("^(?:1[0-9]|[0-9]|20)$");
+        var reg25 = new RegExp("^([2][0-5]|[0-9]|[1][0-9])$");
+        var reg10 = new RegExp("^([0-9]|10)$");
+        var reg15 = new RegExp("^(?:1[0-5]|[0-9])$");
+        var reg5 = new RegExp("^([0-5])$");
+
+        $("#gltaid").on('click', function () {
+        //表单序列化
+            var aa = $('#glmarkform').serializeArray();
+            if (!reg30.test(aa[0].value)) {
+                layer.alert("满意度分数范围在0-30内！");
+                return false;
+            }
+            if (!reg25.test(aa[1].value)) {
+                layer.alert("推广度分数范围在0-25内！");
+                return false;
+            }
+            if (!reg20.test(aa[2].value)) {
+                layer.alert("创新性分数范围在0-20内！");
+                return false;
+            }
+            if (!reg20.test(aa[3].value)) {
+                layer.alert("成本贡献分数范围在0-20内！");
+                return false;
+            }
+            if (!reg5.test(aa[4].value)) {
+                layer.alert("报告制作分数范围在0-5内！");
+                return false;
+            }
+            var guanlisum = parseInt(aa[0].value) + parseInt(aa[1].value) + parseInt(aa[2].value) + parseInt(aa[3].value) + parseInt(aa[4].value);
+            var guanlimsg = "此提案总分为:" + guanlisum + "分,确认提交此分数么？"
+            var glmid = $("#gltaid").data('id');
+            layer.confirm(guanlimsg, {
+                btn: ['确定', '取消'] //按钮
+            }, function (index) {
+                 layer.close(index);
+                 var markdetail=parseInt(aa[0].value)+","+ parseInt(aa[1].value) +","+  parseInt(aa[2].value) +","+  parseInt(aa[3].value) +","+  parseInt(aa[4].value)+","+0;
+                $.ajax({
+                    url: "/Admin/Manage/MarkTopic",
+                    data: { maid: glmid, mark: guanlisum, submark: markdetail,marktype:1},
+                    success: function (data) {
+                        //将data的json字符串转换成js对象
+                        var re = JSON.parse(data);
+                        if (re.success == true) {
+                            layer.msg(re.exinfo, {
+                                icon: 1
+                                , time: 2000
+                            }, function () {
+                                window.location.href = "/Admin/Manage/JiDiMark"
+                            });
+                        } else {
+                            layer.alert(re.exinfo);
+                        }
+                    }
+                })
+            }, function (index) {
+                layer.close(index);
+            });
+        })
+
+        //技术提案表单提交
+        $("#jstaid").on('click', function () {
+            //表单序列化
+            var bb = $('#jsmarkform').serializeArray();
+            if (!reg30.test(bb[0].value)) {
+                layer.alert("收益分数范围在0-30内！");
+                return false;
+            }
+            if (!reg20.test(bb[1].value)) {
+                layer.alert("推广度分数范围在0-20内！");
+                return false;
+            }
+            if (!reg20.test(bb[2].value)) {
+                layer.alert("创新性分数范围在0-20内！");
+                return false;
+            }
+            if (!reg15.test(bb[3].value)) {
+                layer.alert("品质分数范围在0-15内！");
+                return false;
+            }
+            if (!reg10.test(bb[4].value)) {
+                layer.alert("EHS贡献度分数范围在0-10内！");
+                return false;
+            }
+            if (!reg5.test(bb[5].value)) {
+                layer.alert("报告制作分数范围在0-5内！");
+                return false;
+            }
+            var jishusum = parseInt(bb[0].value) + parseInt(bb[1].value) + parseInt(bb[2].value) + parseInt(bb[3].value) + parseInt(bb[4].value) + parseInt(bb[5].value);
+            var jishumsg = "此提案总分为:" + jishusum + "分,确认提交此分数么？"
+            var jsmid = $("#jstaid").data('id');
+            layer.confirm(jishumsg, {
+                btn: ['确定', '取消'] //按钮
+            }, function (index) {
+                    layer.close(index);
+               var markdetail = parseInt(bb[0].value)+","+ parseInt(bb[1].value) +","+  parseInt(bb[2].value) +","+  parseInt(bb[3].value) +","+  parseInt(bb[4].value)+","+parseInt(bb[5].value);
+                $.ajax({
+                    url: "/Admin/Manage/MarkTopic",
+                    data: { maid: jsmid, mark: jishusum, submark:markdetail,marktype:1},
+                    success: function (data) {
+                        //将data的json字符串转换成js对象
+                        var re = JSON.parse(data);
+                        if (re.success == true) {
+                            layer.msg(re.exinfo, {
+                                icon: 1
+                                , time: 2000
+                            }, function () {
+                                window.location.href = "/Admin/Manage/JiDiMark"
+                            });
+                        } else {
+                            layer.alert(re.exinfo);
+                        }
+                    }
+                })
+            }, function (index) {
+                layer.close(index);
+            });
+        })
+    </script>
+}

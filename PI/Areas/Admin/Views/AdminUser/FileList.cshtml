@@ -1,0 +1,57 @@
+﻿
+@{
+    ViewData["Title"] = "TestAll";
+}
+    <div style="margin:20px">
+        <span class="layui-breadcrumb">
+            <a href="">用户管理</a>
+            <a><cite>文件清理</cite></a>
+        </span>
+        <table id="delfiletable" lay-filter="delfiletable"></table>
+        <script type="text/html" id="delfiletool">
+            <a class="layui-btn layui-btn-xs" lay-event="delall">删除</a>
+        </script>
+    </div>
+
+        @section Scripts{
+            <script>
+                var table = layui.table;
+                var tableIns = table.render({
+                    elem: '#delfiletable'
+                    , url: '/Admin/AdminUser/GetDelFileList' //数据接口
+                    , page: true //开启分页
+                    , limit: 10 //每页显示行数
+                    , id: 'delfiletable'
+                    , cols: [[ //表头
+                        { field: 'Id', title: '编号', hide: 'true' }
+                        , {
+                            field: 'FileName', title: '发布日期', width: '80%'
+                        }
+                        , { fixed: 'right', title: '操作', toolbar: '#delfiletool', width: '20%' }
+                    ]]
+                });
+
+
+                table.on('tool(delfiletable)', function (obj) {
+                    var data = obj.data;
+                    if (obj.event === 'delall') {
+                        $.ajax({
+                            type: "POST",
+                            url: "/Tool/DeleteFile",
+                            data: { dfid: obj.data.Id, tid: 0 },
+                            success: function (data) {
+                                var dfoj = JSON.parse(data);
+                                if (dfoj.success) {
+                                    layer.msg("删除成功！")
+                                } else {
+                                    layer.alert(dfoj.exinfo)
+                                }
+                            }
+                        });
+
+
+                    }
+                })
+
+            </script>
+        }

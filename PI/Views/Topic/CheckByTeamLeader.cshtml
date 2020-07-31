@@ -1,0 +1,334 @@
+﻿@model Topic
+@{
+    ViewData["Title"] = Model.Title;
+    var filelist = ViewBag.CFiles as List<MyFile>;
+}
+<div class="layui-container">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md6 fly-home-jie">
+            <div class="fly-panel" style="padding:20px">
+                <h1>@Model.Title</h1>
+                <div class="fly-detail-info">
+                    <span class="layui-badge layui-bg-green fly-detail-column">@Model.Node.Name</span>
+                    <span class="fly-list-nums">
+                        <a href="#comment"><i class="iconfont" title="改善人数">&#xe60c;</i>@Model.ReplyCount</a>
+                    </span>
+                </div>
+                <div class="detail-about">
+                    <a class="fly-avatar" href="#">
+                        <img src="~/images/longi.png" alt="隆基">
+                    </a>
+                    <div class="fly-detail-user">
+                        <a href="#" class="fly-link">
+                            <cite>@Model.UserName-@Model.User.RealName</cite>
+                            <i class="layui-badge fly-badge-vip">@Model.User.Department</i>
+                        </a>
+                    </div>
+                    <div class="detail-hits">
+                        <span>@Model.CreateOn</span>
+                    </div>
+                </div>
+
+                <div class="detail-body photos">
+                    <h3 style="color:gray">提案背景</h3> <hr>
+                    @Html.Raw(Model.Content)
+                    <br />
+                    <h3 style="color:gray">建议改善</h3> <hr>
+                    @Html.Raw(Model.Suggest)
+                    <br />
+                    @if (Model.HasUpload != "0")
+                    {
+                        <h3 style="color:gray">附件下载</h3><hr>
+                        @for (int i = 0; i < filelist.Count; i++)
+                        {
+                            var file = filelist[i];
+                            <p><i class="layui-icon layui-icon-link"></i><a asp-controller="Tool" asp-action="DownLoad" asp-route-fiid="@file.Id">@file.FileName@file.FileExt</a></p>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-col-md6 fly-home-da">
+            <div class="fly-panel" style="padding:20px">
+                <h1 class="fly-panel-title">提案审核</h1>
+                <div class="layui-form" style="margin:10px">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <input type="text" id="tauseradd" placeholder="请输入参与人员姓名" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-inline">
+                            <button class="layui-btn" id="addpbtn" data-id="@Model.Id">添加人员</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-check-list">
+                    <table id="checktable" lay-filter="checktable"></table>
+                    <script type="text/html" id="checktable_tool">
+                        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="userdel">删除</a>
+                    </script>
+                </div>
+                <button type="button" class="layui-btn layui-btn-normal" id="changetl" data-id="@Model.Id">转办</button>
+                <button type="button" class="layui-btn" id="oktopic" data-id="@Model.Id">通过</button>
+                <button type="button" class="layui-btn layui-btn-danger" id="ngtopic" data-id="@Model.Id"  data-username="@Model.TeamLeader">驳回</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script>
+        var layer = layui.layer;
+        var table = layui.table;
+        var repeatlot = new Array();
+        var stabledata = [];
+        var tid = $("#addpbtn").data('id');
+        $.ajax({
+            type: "POST",
+            url: "/Topic/ReplyUserInfo",
+            async: false,
+            data: { id: tid },
+            success: function (data) {
+                var poj = JSON.parse(data);
+                if (poj.success) {
+                    stabledata = poj.data
+                    for (var i = 0; i < poj.data.length; i++) {
+                        repeatlot.push(poj.data[i].realname);
+                    }
+                }
+            }
+        });
+
+        var tableIns = table.render({
+            elem: '#checktable',
+            height: 200,
+            defaultToolbar: [],
+            limit: 60,
+            data: stabledata,
+            cols: [
+                [{
+                    field: 'rid',
+                    title: 'rid',
+                    hide: true
+                },
+                {
+                    field: 'username',
+                    title: '工号',
+                    width: '20%'
+                },
+                {
+                    field: 'realname',
+                    title: '姓名',
+                    width: '30%'
+                },
+                {
+                    field: 'dep',
+                    title: '部门',
+                    width: '30%'
+                },
+                {
+                    toolbar: '#checktable_tool',
+                    title: '操作',
+                    width: '20%',
+                    align: 'center'
+                }
+                ]
+            ],
+        });
+
+        //添加人员
+        $("#addpbtn").on('click', function () {
+            addreplyer()
+        })
+
+        $("#tauseradd").keydown(function (event) {
+            if (event.keyCode == "13") {
+                addreplyer()
+            }
+        })
+
+
+
+        function addreplyer() {
+            var taname = $("#tauseradd").val();
+            if (taname == "") {
+                layer.alert("用户名不准为空");
+                return;
+            }
+            var repeatresult = repeatlot.indexOf(taname);
+            if (repeatresult >= 0) {
+                layer.alert('此用户已添加!')
+                $("#tauseradd").val('');
+                return;
+            }
+            var tid = $("#addpbtn").data("id");
+            $.ajax({
+                type: "POST",
+                url: "/Topic/AddReplybyTeamLeader",
+                data: { username: taname, topicid: tid },
+                success: function (data) {
+                    var poj = JSON.parse(data);
+                    if (poj.success) {
+                        $("#tauseradd").val("");
+                        var aplObj = tableIns;
+                        var aplconfig = aplObj.config;
+                        var apldataTemp = aplconfig.data;
+                        apldataTemp.push({
+                            "rid": poj.rid,
+                            "username": poj.username,
+                            "realname": poj.realname,
+                            "dep": poj.dep
+                        });
+
+                        tableIns = table.reload(aplconfig.id, $.extend(true, {
+                            data: apldataTemp,
+                        }, {}));
+                        repeatlot.push(poj.realname);
+                        layer.msg(poj.ex, { time: 1000 })
+                    } else {
+                        layer.alert(poj.ex)
+                    }
+                }
+            });
+        }
+
+        //删除人员
+        table.on('tool(checktable)', function (obj) {
+            switch (obj.event) {
+                case 'userdel':
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/Topic/DeleteReply",
+                        data: { replyid: obj.data.rid },
+                        success: function (data) {
+                            var roj = JSON.parse(data);
+                            if (roj.success) {
+                                var tableObj = tableIns;
+                                var pdconfig = tableObj.config;
+                                var pddataTemp = pdconfig.data;
+                                var trElem = obj.tr.first();
+                                var index = trElem.data('index');
+                                var dataIndex = index
+                                pddataTemp.splice(dataIndex, 1);
+                                tableIns = table.reload(pdconfig.id, $.extend(true, {
+                                    data: pddataTemp
+                                }, {}));
+                                repeatlot.splice($.inArray(obj.data.realname, repeatlot), 1);
+                                layer.msg("删除成功", { time: 1000 });
+                            } else {
+                                layer.msg(roj.ex, { time: 1000 })
+                            }
+                        }
+                    });
+                    break;
+                default:
+                    break;
+            }
+        });
+        //转办提案
+        $("#changetl").on('click', function () {
+            if (repeatlot.length > 0) {
+                layer.alert("转办提案不得添加实施人，请删除实施人");
+                return;
+            } else {
+                layer.confirm('提案转办会自动转入管理员审核，确认要转办提案么？', {
+                    btn: ['确定', '取消'] //按钮
+                }, function () {
+                    var zbtid = $("#changetl").data("id");
+                    $.ajax({
+                        type: "POST",
+                        url: "/Topic/ChangeTeamLeader",
+                        data: { newtl: "Admin", tid: zbtid },
+                        success: function (data) {
+                            var ctobj = JSON.parse(data);
+                            if (ctobj.code == 0) {
+                                layer.msg("转办成功", {
+                                    icon: 1
+                                    , time: 2000
+                                }, function () {
+                                    window.location.href = "/User/MyCheck"
+                                });
+                            } else {
+                                layer.alert(ctobj.msg);
+                            }
+                        }
+                    })
+                }, function () {
+                    layer.close()
+                });
+            }
+        })
+
+        var oktopiclock=1
+
+        //通过提案
+        $("#oktopic").on('click', function () {
+            if (oktopiclock == 2){
+                return false;
+            }
+            if (repeatlot.length == 0) {
+                layer.alert("请先添加实施人员");
+                return;
+            } else {
+                oktopiclock = 2;
+                var uoid = $("#oktopic").data("id")
+                $.ajax({
+                    type: "POST",
+                    url: "/Topic/UpdateToTop",
+                    data: { id: uoid },
+                    success: function (data) {
+                        var roj = JSON.parse(data);
+                        if (roj.success) {
+                            
+                            layer.msg(roj.exinfo, {
+                                icon: 1
+                                , time: 2000
+                            }, function () {
+                                 oktopiclock = 1;
+                                window.location.href = "/User/MyCheck"
+                            });
+                        } else {
+                            layer.msg(roj.exinfo);
+                            oktopiclock = 1;
+                        }
+                    }
+                });
+            }
+        })
+
+        //驳回提案
+        $("#ngtopic").on('click', function () {
+            var hid = $("#ngtopic").data("id");
+            var opeuser = $("#ngtopic").data("username");
+            layer.confirm('确认驳回么？', {
+                btn: ['确定', '取消'] //按钮
+            }, function (index) {
+                layer.close(index);
+                layer.prompt({
+                    formType: 0,
+                    value: '',
+                    title: '请输入驳回理由',
+                }, function (value, index, elem) {
+                    $.ajax({
+                        url: "/Topic/HideTopic",
+                        data: { htid: hid, hidereason: value,opeuser: opeuser},
+                        success: function (data) {
+                            var re = JSON.parse(data);
+                            if (re.success == false) {
+                                layer.alert(re.exinfo,{
+                                    time: 2000
+                                });
+                            } else {
+                                
+                                layer.close(index);
+                                window.location.href = "/User/MyCheck"
+                            }
+                        }
+                    })
+                })
+            }, function (index) {
+                layer.close(index);
+            });
+        })
+    </script>
+}

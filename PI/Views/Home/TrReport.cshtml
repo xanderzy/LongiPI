@@ -1,0 +1,141 @@
+﻿
+<div class="fly-panel fly-panel-user" pad20>
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">标题</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="txt_searchtr_title" placeholder="请输入标题" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">改善人员</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="txt_searchtr_username" placeholder="请输入提案人员姓名" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-inline">
+                    <select id="txt_searchtr_status">
+                        <option value="" selected></option>
+                        <option value=4>实施中</option>
+                        <option value=6>已完结</option>
+                        <option value=5>基地评分中</option>
+                        <option value=7>总部评分中</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">开始时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="txt_searchtr_startdate" placeholder="yyyy-MM-dd">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">结束时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="txt_searchtr_enddate" placeholder="yyyy-MM-dd">
+                </div>
+            </div>
+            <div class="layui-inline layui-col-md-offset2">
+                <button class="layui-btn" id="btn_trquery" data-type="reload">查询</button>
+            </div>
+        </div>
+    </div>
+    <table id="pitrreport"></table>
+</div>
+
+@section Scripts{
+    <script>
+        layui.use('table', function () {
+            var table = layui.table;
+            table.render({
+                elem: '#pitrreport'
+                , url: '/Home/GetTrReport' //数据接口
+                , page: true
+                , loading:true
+                , toolbar: true //导出打印工具栏
+                , id: 'TrReportTable'
+                , cols: [[ //表头
+                    { field: 'UserName', title: '工号', width:'10%'}
+                    , { field: 'RealName', title: '姓名', width: '10%'}
+                    , {
+                        field: 'Type', title: '状态', width: '15%', templet: function (d) {
+                            if (d.Type == 4) { return "实施中"; }
+                            if (d.Type == 5) { return "基地评分中"; }
+                            if (d.Type == 6) { return "已完结"; }
+                            if (d.Type == 7) { return "总部评分中"; }
+                        }
+                    }
+                    , {
+                        field: 'CreateOn', title: '参与提案日期', width: '25%', templet: function (d) {
+                            var datet= new Date(d.CreateOn);
+                            var o = {
+                                "M+": datet.getMonth() + 1,                 //月份
+                                "d+": datet.getDate(),                    //日
+                                "h+": datet.getHours(),                   //小时
+                                "m+": datet.getMinutes(),                 //分
+                                "s+": datet.getSeconds(),                 //秒
+                                "q+": Math.floor((datet.getMonth() + 3) / 3), //季度
+                                "S": datet.getMilliseconds()             //毫秒
+                            };
+                            var fmt = "yyyy-MM-dd hh:mm:ss";
+                            if (/(y+)/.test(fmt))
+                                fmt = fmt.replace(RegExp.$1, (datet.getFullYear() + "").substr(4 - RegExp.$1.length));
+                            for (var k in o)
+                                if (new RegExp("(" + k + ")").test(fmt))
+                                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                            return fmt;
+                        }
+                    }
+                    , {
+                        field: 'Title', title: '提案标题', width: '40%', templet: function(d) {
+                            return '<a href="/Topic/Index/' + d.TopicId+'"'+' class="layui-table-link">'+d.Title+ '</a></div>';
+                        }
+
+                    }
+                    , { field: 'ReplyContent', title: '参与回复', hide: true }
+                ]]
+            });
+
+            var $ = layui.$, active = {
+                reload: function () {
+                    var trusername = $('#txt_searchtr_username');
+                    var trtitle = $('#txt_searchtr_title');
+                    var trstatus = $('#txt_searchtr_status');
+                    var trstartdate = $('#txt_searchtr_startdate');
+                    var trendddte = $('#txt_searchtr_enddate');
+                    table.reload('TrReportTable', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            username: trusername.val(),
+                            title: trtitle.val(),
+                            status: trstatus.val(),
+                            startdate: trstartdate.val(),
+                            enddate: trendddte.val()
+                        }
+                    });
+                }
+            };
+            $("#btn_trquery").on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            })
+        });
+    </script>
+    <script>
+        var laydate = layui.laydate;
+        laydate.render({
+            elem: '#txt_searchtr_startdate'
+        });
+        laydate.render({
+            elem: '#txt_searchtr_enddate'
+        });
+    </script>
+}
+

@@ -1,0 +1,139 @@
+﻿
+@{
+    ViewData["Title"] = "MyCheck";
+}
+<div class="layui-container fly-marginTop fly-user-main">
+    <ul class="layui-nav layui-nav-tree layui-inline" lay-filter="user">
+        <li class="layui-nav-item">
+            <a asp-controller="User" asp-action="MyHome">
+                <i class="layui-icon">&#xe609;</i>
+                我的主页
+            </a>
+        </li>
+        <li class="layui-nav-item">
+            <a asp-controller="User" asp-action="MyTR">
+                <i class="layui-icon">&#xe612;</i>
+                用户中心
+            </a>
+        </li>
+        <li class="layui-nav-item">
+            <a asp-controller="User" asp-action="UserInfo">
+                <i class="layui-icon">&#xe620;</i>
+                基本设置
+            </a>
+        </li>
+        <li class="layui-nav-item">
+            <a asp-controller="User" asp-action="MyCheck">
+                <i class="layui-icon">&#xe611;</i>
+                我的审核
+            </a>
+        </li>
+        <li class="layui-nav-item layui-this">
+            <a asp-controller="User" asp-action="MyMark">
+                <i class="layui-icon">&#xe6b2;</i>
+                我的打分
+            </a>
+        </li>
+    </ul>
+    <div class="site-tree-mobile layui-hide">
+        <i class="layui-icon">&#xe602;</i>
+        <div class="site-mobile-shade"></div>
+    </div>
+    <div class="site-tree-mobile layui-hide">
+        <i class="layui-icon">&#xe602;</i>
+    </div>
+    <div class="site-mobile-shade"></div>
+
+
+    <div class="fly-panel fly-panel-user" pad20>
+        <div class="layui-tab layui-tab-brief" lay-filter="ccs">
+            <ul class="layui-tab-title" id="LAY_mark">
+                <li data-type="mine-jie" class="layui-this" data-id="mymark">提案评分</li>
+            </ul>
+            <div class="layui-tab-content" style="padding: 20px 0;">
+                <div class="layui-tab-item layui-show">
+                    <ul class="mine-view jie-row" id="mymark"></ul>
+                </div>
+            </div>
+            <div id="LAYmark_page"></div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        window.onload = function () {
+            loadData()  //请求数据
+            getPage()     //分页操作
+        }
+        var page = 1; //设置首页页码
+        var limit = 15;  //设置一页显示的条数
+        var total;    //总条数
+
+
+
+            function loadData() {
+                $.ajax({
+                    type: "post",
+                    url: "/User/GetMarkTopic",
+                    async: false,
+                    dataType: 'json',
+                    data: {
+                        "pageIndex": page,
+                        "pageSize": limit,
+                    },
+                    success: function (ret) {
+                        total = ret.total;  //设置总条数
+                        var data1 = ret.rows;
+                        var html = '';
+                        for (var i = 0; i < data1.length; i++) {
+                            html += '<li>';
+                            html += '<a href="../Topic/MarkByLeader/' + data1[i].Id + '">' + data1[i].Title + '</a>';
+                            html += '<i>派发于' + TimeFormat(data1[i].CreateDate) + '</i>';
+                            html += '</li>'
+                        }
+                        $("#mymark").empty().append(html);
+                    }
+                });
+            }
+
+
+        function TimeFormat(d) {
+            var datet = new Date(d);
+            var o = {
+                "M+": datet.getMonth() + 1,                 //月份
+                "d+": datet.getDate(),                    //日
+                "h+": datet.getHours(),                   //小时
+                "m+": datet.getMinutes(),                 //分
+                "s+": datet.getSeconds(),                 //秒
+                "q+": Math.floor((datet.getMonth() + 3) / 3), //季度
+                "S": datet.getMilliseconds()             //毫秒
+            };
+            var fmt = "yyyy-MM-dd hh:mm:ss";
+            if (/(y+)/.test(fmt))
+                fmt = fmt.replace(RegExp.$1, (datet.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt))
+                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        }
+
+
+            function getPage() {
+                layui.use('laypage', function () {
+                    var laypage = layui.laypage;
+                    laypage.render({
+                        elem: 'LAYmark_page'
+                        ,count: total,
+                        limit: limit,
+                        jump: function (obj, first) {
+                            page = obj.curr;
+                            limit = obj.limit;
+                            if (!first) {
+                                loadData()
+                            }
+                        }
+                    });
+                });
+            }
+    </script>
+}

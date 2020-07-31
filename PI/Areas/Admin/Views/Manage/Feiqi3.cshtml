@@ -1,0 +1,114 @@
+﻿
+@{
+    ViewData["Title"] = "TestAll";
+}
+<table id="adminypaifa" lay-filter="layadminypf"></table>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="look">查看</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="backt">撤回</a>
+</script>
+
+@section Scripts{
+    <script>
+        var table = layui.table;
+        table.render({
+            elem: '#adminypaifa'
+            , url: '/Admin/Manage/GetYipaifaIndex' //数据接口
+            , page: true //开启分页
+            , limit: 10 //每页显示行数
+            , id: 'myyipaifatableid'
+            , cols: [[ //表头
+                  { field: 'UserName', title: '工号' }
+                , {
+                    field: 'CreateOn', title: '发布日期',
+                    templet: function (d) {
+                        var datet = new Date(d.CreateOn);
+                        var o = {
+                            "M+": datet.getMonth() + 1,                 //月份
+                            "d+": datet.getDate(),                    //日
+                            "h+": datet.getHours(),                   //小时
+                            "m+": datet.getMinutes(),                 //分
+                            "s+": datet.getSeconds(),                 //秒
+                            "q+": Math.floor((datet.getMonth() + 3) / 3), //季度
+                            "S": datet.getMilliseconds()             //毫秒
+                        };
+                        var fmt = "yyyy-MM-dd hh:mm:ss";
+                        if (/(y+)/.test(fmt))
+                            fmt = fmt.replace(RegExp.$1, (datet.getFullYear() + "").substr(4 - RegExp.$1.length));
+                        for (var k in o)
+                            if (new RegExp("(" + k + ")").test(fmt))
+                                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                        return fmt;
+                    }
+                }
+                , {
+                    field: 'Title', title: '标题', templet: function (d) {
+                        return '<a href="/Topic/Index/' + d.Id + '"' + ' class="layui-table-link">' + d.Title + '</a>';
+                    }
+                  }
+                , { fixed: 'right', title: '操作', toolbar: '#barDemo', width: 270 }
+            ]]
+        });
+
+        //单元格编辑框  tool
+        table.on('tool(layadminypf)', function (obj) {
+            var data = obj.data;
+           if (obj.event === 'look') {
+                var showfirsthtml = '<div id="showdetail" class="site-content" style="padding:20px">' +
+                    '<div class="site-title">' +
+                    ' <h1>' + obj.data.Title + '</h1> ' +
+                    '<div>' +
+                    '<blockquote class="layui-elem-quote">' +
+                    obj.data.UserName + '-' + obj.data.RealName + '-' + obj.data.Department +
+                    '<p>发布于' + obj.data.CreateOn + '</p>' +
+                    '</blockquote>' +
+                    '</div class="site-text">' +
+                    '<div class="layui-field-box">' +
+                    '<h2 style="color:gray">提案背景</h2> <hr>' +
+                    obj.data.Content +
+                    '<h2 style="color:gray">建议改善</h2><hr>' +
+                    obj.data.Suggest;
+
+                if (obj.data.HasUpload == "0") {
+                    showfirsthtml = showfirsthtml + '</div>' + '</div>';
+                }
+                else {
+                    showfirsthtml = showfirsthtml +
+                        '<h2 style="color:gray">附件下载</h2><hr>' +
+                        '<a href="/Admin/Manage/DownLoadByAdmin?Parma1=' + obj.data.HasUpload + '">附件下载</a>'
+                        + '</div>' + '</div>';
+                }
+                layer.open({
+                    type: 1,
+                    title: false,
+                    closeBtn: 0,
+                    shadeClose: true,
+                    area:['700px','400px'],
+                    content: showfirsthtml
+
+                })
+            } else if (obj.event === 'backt') {
+                var did = data.Id;
+                    $.ajax({
+                        url: "/Admin/Manage/YipfBackToNormal",
+                        data: { ypfid: did },
+                        success: function (data) {
+                            //layer.close(ii);
+                            //将data的json字符串转换成js对象
+                            var re = JSON.parse(data);
+                            if (re.success == false) {
+                                layer.alert(re.exinfo);
+                            } else {
+                                obj.del();
+                                layer.msg(re.exinfo, {
+                                    time: 2000
+                                });
+                                
+                            }
+                        }
+                    })
+
+            }
+        })
+    </script>
+}

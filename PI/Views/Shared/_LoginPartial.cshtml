@@ -1,0 +1,103 @@
+﻿@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+<div class="fly-header layui-bg-black">
+    <div class="layui-container">
+        <a class="fly-logo" href="/">
+            <img src="~/images/longilog.png" alt="隆基提案改善系统">
+        </a>
+        <ul class="layui-nav fly-nav-user">
+            @if (SignInManager.IsSignedIn(User))
+            {
+                @if (UserManager.GetUserName(User).Equals("admin"))
+                {
+                    <li class="layui-nav-item">
+                        <a class="fly-nav-avatar" href="javascript:;">
+                            <img src="~/images/longi.png">
+                        </a>
+                        <dl class="layui-nav-child">
+                            <dd><a asp-area="Admin" asp-controller="Manage" asp-action="Index"><i class="layui-icon">&#xe620;</i>后台管理</a></dd>
+                            <hr style="margin: 5px 0;">
+                            <dd><a asp-controller="Account" asp-action="LogOff" style="text-align: center;">退出</a></dd>
+                        </dl>
+                    </li>
+
+                }
+                else
+                {
+                    <li class="layui-nav-item">
+                        <a class="fly-nav-avatar" href="javascript:;">
+                            <cite class="layui-hide-xs">@UserManager.GetUserAsync(User).Result.RealName</cite>
+                            <i class="layui-badge fly-badge-vip layui-hide-xs">@UserManager.GetUserAsync(User).Result.Department</i>
+                            <img src="~/images/longi.png">
+                        </a>
+                        <dl class="layui-nav-child">
+                            <dd><a asp-controller="User" asp-action="UserInfo"><i class="layui-icon">&#xe620;</i>基本设置</a></dd>
+                            <dd><a asp-controller="User" asp-action="MyHome"><i class="iconfont icon-tongzhi" style="top: 4px;"></i>实施中提案</a></dd>
+                            <dd><a asp-controller="User" asp-action="MyCheck"><i class="layui-icon" style="margin-left: 2px; font-size: 22px;">&#xe68e;</i>提案审核</a></dd>
+                            <hr style="margin: 5px 0;">
+                            <dd><a asp-controller="Account" asp-action="LogOff" style="text-align: center;">退出</a></dd>
+                        </dl>
+                    </li>
+                }
+            }
+            else
+            {
+                <li class="layui-nav-item">
+                    <a class="iconfont icon-touxiang layui-hide-xs" href="#"></a>
+                </li>
+                <li class="layui-nav-item">
+                    <a asp-controller="Account" asp-action="Login">登入</a>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+<div class="fly-panel fly-column">
+    <div class="layui-container">
+        <ul class="layui-nav" style="background-color:white">
+            <li class="layui-nav-item" lay-unselect><a asp-controller="Home" asp-action="Index" style="color:black">首页</a></li>
+            <li class="layui-nav-item" lay-unselect>
+                <a href="javascript:;" style="color:black">
+                    报表查询
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a asp-controller="Home" asp-action="Report" style="color:black">提案报表</a></dd>
+                    <dd><a asp-controller="Home" asp-action="MergeReport" style="color:black">混合报表</a></dd>
+                    <dd><a asp-controller="Home" asp-action="TrReport" style="color:black">改善报表</a></dd>
+                </dl>
+            </li>
+            <!--<li class="layui-nav-item layui-hide-xs layui-hide-sm layui-show-md-inline-block"><span class="fly-mid"></span></li>-->
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <li class="layui-nav-item" lay-unselect><a asp-controller="User" asp-action="MyTR" style="color:black">我的提案/改善</a></li>
+                <li class="layui-nav-item" lay-unselect><a asp-controller="User" asp-action="MyCheck" style="color:black">我审核的提案</a></li>
+                <!--<li class="layui-nav-item" lay-unselect	><a asp-controller="User" asp-action="MyMark" style="color:black">我打分的提案</a></li>-->
+            }
+        </ul>
+        <div class="fly-column-right layui-hide-xs">
+            <form asp-controller="Home" asp-action="Index" method="get" class="fly-extend-banner-search">
+                <div class="layui-inline">
+                    <input placeholder="请输入关键字" name="topicname" autocomplete="off" value="" class="layui-input">
+                </div>
+                <button class="layui-btn lay-submit">
+                    <i class="layui-icon layui-icon-search"></i>
+                </button>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    @if (@ViewContext.RouteData.Values["Controller"].ToString() != "Topic" && @ViewContext.RouteData.Values["Action"].ToString() != "AddTopic")
+                    { 
+                        <a asp-controller="Home" asp-action="AddTopic" class="layui-btn">发布提案</a>
+                    }
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="layui-btn">登陆</a>
+                }
+            </form>
+        </div>
+    </div>
+</div>
+
+

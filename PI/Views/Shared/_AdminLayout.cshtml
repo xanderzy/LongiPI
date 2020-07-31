@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>提案改善系统后台</title>
+    <environment names="Development">
+        <link rel="stylesheet" href="~/js/layui-v2.5.6/layui/css/layui.css">
+    </environment>
+    <environment names="Staging,Production">
+        <link rel="stylesheet" href="~/js/layui-v2.5.6/layui/css/layui.css">
+    </environment>
+</head>
+<body>
+    <div class="layui-layout-body">
+        <div class="layui-layout layui-layout-admin">
+            <div class="layui-header">
+                <a class="fly-logo" href="/">
+                    <img src="~/images/longilog.png" alt="隆基提案改善系统">
+                </a>
+                <ul class="layui-nav layui-layout-right">
+                    <p>欢迎admin</p>
+                </ul>
+            </div>
+
+            <div class="layui-side layui-bg-black">
+                <div class="layui-side-scroll">
+                    <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+                    <ul class="layui-nav layui-nav-tree" lay-filter="adminmenutree">
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a class="" href="javascript:;">提案管理</a>
+                            <dl class="layui-nav-child">
+                                <dd><a asp-controller="Manage" asp-action="Index" asp-area="Admin">提案审核</a></dd>
+                                <dd><a asp-controller="Manage" asp-action="HideIndex" asp-area="Admin">驳回提案管理</a></dd>
+                                <dd><a asp-controller="Manage" asp-action="JidiMark" asp-area="Admin">基地评分</a></dd>
+                                <dd><a asp-controller="Manage" asp-action="MarkIndex" asp-area="Admin">总部评分</a></dd>
+                                <dd><a asp-controller="Manage" asp-action="ChangeRuser" asp-area="Admin">更改实施人</a></dd>
+                                <dd><a asp-controller="Manage" asp-action="BonusReport" asp-area="Admin">奖金报表</a></dd>
+                            </dl>
+                        </li>
+                        <li class="layui-nav-item  layui-nav-itemed">
+                            <a href="javascript:;">用户管理</a>
+                            <dl class="layui-nav-child">
+                                <dd><a asp-controller="AdminUser" asp-action="Index" asp-area="Admin">用户信息编辑</a></dd>
+                                <dd><a asp-controller="AdminUser" asp-action="FileList" asp-area="Admin">文件清理</a></dd>
+                                <dd><a href="/Admin/AdminUser/Register">用户注册</a></dd>
+                            </dl>
+                        </li>
+                        <li class="layui-nav-item"><a asp-controller="Notice" asp-action="Index" asp-area="Admin">公告管理</a></li>
+
+                        <li class="layui-nav-item"><a href="">节点管理</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="layui-body">
+                @RenderBody()
+            </div>
+
+            <div class="layui-footer">
+
+                ©浙江隆基乐叶提案改善系统-byxander
+            </div>
+        </div>
+    </div>
+    <environment names="Development">
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/js/layui-v2.5.6/layui/layui.all.js"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/js/layui-v2.5.6/layui/layui.all.js"></script>
+    </environment>
+    @RenderSection("scripts", required: false)
+
+    <script>
+       var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+        //监听导航点击
+  element.on('nav(adminmenutree)', function(elem){
+        console.log(elem)
+  });
+    </script>
+</body>
+</html>

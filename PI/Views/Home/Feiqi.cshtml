@@ -1,0 +1,289 @@
+﻿@{
+    ViewData["Title"] = "发布新提案";
+    var user = ViewBag.User as User;
+}
+@model Topic
+<div class="layui-container fly-marginTop">
+    <div class="fly-panel" pad20 style="padding-top: 5px;">
+        <div class="layui-form layui-form-pane">
+            <div class="layui-tab layui-tab-brief" lay-filter="user">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">发表新提案</li>
+                </ul>
+                <div class="layui-form layui-tab-content" id="LAY_ucm" style="padding: 20px 0;">
+                    <div class="layui-tab-item layui-show">
+                        <form method="post" asp-controller="Home" asp-action="AddTopics">
+                            <div class="layui-row layui-col-space15 layui-form-item">
+                                <div class="layui-col-md3">
+                                    <label class="layui-form-label">提案类别</label>
+                                    <div class="layui-input-block">
+                                        <select lay-verify="required" asp-for="NodeId" lay-filter="column">
+                                            <option></option>
+                                            <option value="2">管理类</option>
+                                            <option value="3">技术类</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-col-md9">
+                                    <label for="L_title" class="layui-form-label">标题</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" id="L_title" asp-for="Title" required lay-verify="required|maxlength" autocomplete="off" class="layui-input">
+                                    </div>
+                                </div>
+                            </div>
+                            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+                                <legend>提案背景</legend>
+                            </fieldset>
+                            <div class="layui-form-item layui-form-text">
+                                <div id="wangeditor11" class="layui-input-block" style="height:320px">
+                                </div>
+                                <div style="display:none">
+                                    <textarea rows="10" asp-for="Content" id="editor11" required lay-verify="required"></textarea>
+                                </div>
+                            </div>
+                            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+                                <legend>建议改善</legend>
+                            </fieldset>
+                            <div class="layui-form-item layui-form-text">
+                                <div id="wangeditor22" class="layui-input-block" style="height:320px">
+                                </div>
+                                <div style="display:none">
+                                    <textarea rows="10" asp-for="Suggest" id="editor22" required lay-verify="required"></textarea>
+                                </div>
+                            </div>
+                            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+                                <legend>文件上传</legend>
+                            </fieldset>
+
+                            <div class="layui-upload">
+                                <blockquote class="layui-elem-quote">
+                                    提醒：多文件上传-每上传一个文件点击一次选择文件和开始上传。无法一次性选中多个文件上传。
+                                </blockquote>
+                                <div class="layui-upload-list">
+                                    <table class="layui-table">
+                                        <thead>
+                                            <tr>
+                                                <th>文件名</th>
+                                                <th>大小</th>
+                                                <th>状态</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="demoList"></tbody>
+                                    </table>
+                                </div>
+                                <button type="button" class="layui-btn layui-btn-normal" id="testList">选择文件</button>
+                                <button type="button" class="layui-btn" id="testListAction">开始上传</button>
+                            </div>
+
+                            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;"></fieldset>
+                            <div class="layui-form-item">
+                                <input type="hidden" asp-for="UserId" value="@(user.Id)" />
+                                <input type="hidden" asp-for="Email" value="@(user.Email)" />
+                                <input type="hidden" id="atcchfileid" asp-for="HasUpload" value="0" />
+                                <button class="layui-btn" lay-filter="*" lay-submit>立即发布</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script src="~/js/wangEditor.min.js"></script>
+    <script>
+        var E = window.wangEditor
+        var editor1 = new E('#wangeditor11')
+        var $text1 = $('#editor11')
+        editor1.customConfig.onchange = function (html) {
+            $text1.val(html);
+        }
+        editor1.customConfig.menus = [
+            'head',  // 标题
+            'bold',  // 粗体
+            'fontSize',  // 字号
+            'fontName',  // 字体
+            'italic',  // 斜体
+            'underline',  // 下划线
+            'strikeThrough',  // 删除线
+            'foreColor',  // 文字颜色
+            'justify',  // 对齐方式
+            'table', // 表格
+            'image'  // 插入图片
+        ]
+        editor1.customConfig.debug = true;
+        // 忽略粘贴内容中的图片
+        editor1.customConfig.pasteIgnoreImg = true
+        // 使用 base64 保存图片
+        //editor.customConfig.uploadImgShowBase64 = true
+
+        // 上传图片到服务器
+        //editor1.customConfig.uploadFileName = 'myFile'; //设置文件上传的参数名称
+        editor1.customConfig.uploadImgServer = '/Home/ImgUpload/'; //设置上传文件的服务器路径
+        editor1.customConfig.uploadImgMaxSize = 4 * 1024 * 1024; // 将图片大小限制为 3M
+        //自定义上传图片事件
+        editor1.customConfig.uploadImgHooks = {
+            before: function (xhr, editor, files) {
+
+            },
+            success: function (xhr, editor, result) {
+                var bobo = $("#atcchfileid").val();
+                var cc = bobo == "0" ? result.pngid : bobo + "," + result.pngid;
+                $("#atcchfileid").val(cc);
+            },
+            fail: function (xhr, editor, result) {
+                layer.alert("上传图片异常！");
+            },
+            error: function (xhr, editor) {
+                layer.alert("上传图片异常！");
+            },
+            timeout: function (xhr, editor) {
+                layer.alert("上传超时！")
+            }
+        }
+        editor1.customConfig.zIndex = 1       
+        editor1.create();
+    </script>
+    <script>
+        var E = window.wangEditor
+        var editor2 = new E('#wangeditor22')
+        var $text2 = $('#editor22')
+        editor2.customConfig.onchange = function (html) {
+            $text2.val(html);
+        }
+        editor2.customConfig.pasteIgnoreImg = true
+        editor2.customConfig.zIndex = 1
+        editor2.customConfig.menus = [
+            'head',  // 标题
+            'bold',  // 粗体
+            'fontSize',  // 字号
+            'fontName',  // 字体
+            'italic',  // 斜体
+            'underline',  // 下划线
+            'strikeThrough',  // 删除线
+            'foreColor',  // 文字颜色
+            'justify',  // 对齐方式
+            'table'  // 表格
+        ]
+        editor2.create()
+    </script>
+    <script>
+        var upload = layui.upload;
+        var form = layui.form;
+
+        form.verify({
+            maxlength: function (value, item) {
+                if (value.length > 20) {
+                    return "标题长度不能超过20个字符!";
+                }
+            }
+        });
+
+        function delokfile(fileid,indexid) {
+            layer.confirm('此文件已上传成功，确认删除么？', {
+                btn: ['确认', '取消'] //按钮
+            }, function (index) {
+                layer.close(index);
+                $.ajax({
+                    type: "POST",
+                    url: "/Topic/DeleteFile",
+                    data: { dfid: fileid, tid: 0 },
+                    success: function (data) {
+                        var dfoj = JSON.parse(data);
+                        if (dfoj.success) {
+                            var chav = $("#atcchfileid").val();
+                            var charr = chav.split(',');
+                            if (charr.length == 1) { $("#atcchfileid").val('0') }
+                            else {
+                                var index = charr.indexOf(fileid);
+                                //使用splice函数进行移除：
+                                if (index > -1) {
+                                    charr.splice(index, 1);
+                                }
+                                if (charr.length == 1) {
+                                    $("#atcchfileid").val(charr[0])
+                                } else {
+                                    for (var i = 0; i < charr.length; i++) {
+                                        var newfid = "";
+                                        newfid = i == 0 ? charr[0] : newfid + "," + charr[i];
+                                    }
+                                    $("#atcchfileid").val(newfid)
+                                }
+                            }
+                            var dtr = demoListView.find('tr#upload-' + indexid+'-0');
+                            dtr.remove();
+                        } else {
+                            layer.alert(dfoj.exinfo)
+                        }
+                    }
+                });
+            }, function (index) {
+                layer.close(index);
+            });
+        }
+
+       
+       
+        var demoListView = $('#demoList')
+            , uploadListIns = upload.render({
+                elem: '#testList'
+                , url: '/Home/FFileUpload/'
+                , accept: 'file'
+                , multiple: false
+                , auto: false
+                , bindAction: '#testListAction'
+                , choose: function (obj) {
+                    var files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
+                    //读取本地文件
+                    obj.preview(function (index, file, result) {
+                        var tr = $(['<tr id="upload-' + index + '">'
+                            , '<td>' + file.name + '</td>'
+                            , '<td>' + (file.size / 1014).toFixed(1) + 'kb</td>'
+                            , '<td>等待上传</td>'
+                            , '<td>'
+                            , '<button class="layui-btn layui-btn-xs demo-reload layui-hide">重传</button>'
+                            , '<button class="layui-btn layui-btn-xs layui-btn-danger demo-delete">删除</button>'
+                            , '</td>'
+                            , '</tr>'].join(''));
+
+                        //单个重传
+                        tr.find('.demo-reload').on('click', function () {
+                            obj.upload(index, file);
+                        });
+
+                        //删除
+                        tr.find('.demo-delete').on('click', function () {
+                            delete files[index]; //删除对应的文件
+                            tr.remove();
+                            uploadListIns.config.elem.next()[0].value = ''; //清空 input file 值，以免删除后出现同名文件不可选
+                        });
+
+                        demoListView.append(tr);
+                    });
+                }
+                , done: function (res, index, upload) {
+                    if (res.Success) { //上传成功
+                        var tt = $("#atcchfileid").val();
+                        tt = tt == "0" ? res.Fid : tt + "," + res.Fid;
+                        $("#atcchfileid").val(tt);
+                        var tr = demoListView.find('tr#upload-' + index)
+                            , tds = tr.children();
+                        tds.eq(2).html('<span style="color: #5FB878;">上传成功</span>');
+                        tds.eq(3).html('<input type="button" class="layui-btn layui-btn-xs layui-btn-danger" onclick="delokfile(' + res.Fid + ',' + index + ')" value="删除">'); //清空操作
+                        return delete this.files[index]; //删除文件队列已经上传成功的文件
+                    }
+                    this.error(index, upload);
+                }
+                , error: function (index, upload) {
+                    var tr = demoListView.find('tr#upload-' + index)
+                        , tds = tr.children();
+                    tds.eq(2).html('<span style="color: #FF5722;">上传失败</span>');
+                    tds.eq(3).find('.demo-reload').removeClass('layui-hide'); //显示重传
+                }
+            });
+    </script>
+
+}
+
