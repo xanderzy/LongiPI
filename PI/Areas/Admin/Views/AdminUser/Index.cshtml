@@ -16,6 +16,7 @@
             </div>
             <div class="layui-inline">
                 <button class="layui-btn" id="btn_query1" data-type="reload">查询</button>
+                <button class="layui-btn" id="UserFileUpload">用户批量导入</button>
             </div>
         </div>
     </div>
@@ -80,6 +81,32 @@
     <script>
         var table = layui.table;
         var form = layui.form;
+        var upload = layui.upload;
+
+        var uploadInst = upload.render({
+            elem: '#UserFileUpload' //绑定元素
+            , url: '/Home/TMFileImport' //上传接口
+             , size: 5120
+            , accept: "file"
+            , data: {userimport:'userimport'}
+            , multiple: false
+            ,before: function (obj) { //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
+               layer.load(); //上传loading
+            }
+            , done: function (res) {
+                layer.closeAll('loading');
+                if (res.Success) {
+                    layer.alert("用户批量导入成功，请刷新后查看");
+                } else {
+                     layer.closeAll('loading');
+                    layer.alert(res.exinfo);
+                }
+            }
+            , error: function () {
+                layer.msg("上传失败！");
+            }
+        });
+
         table.render({
             elem: '#adminuserindex'
             , url: '/Admin/AdminUser/GetUserIndex' //数据接口

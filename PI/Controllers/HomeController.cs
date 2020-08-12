@@ -18,6 +18,7 @@ using OfficeOpenXml;
 using PI.Models;
 using PI.ViewModels;
 
+
 namespace PI.Controllers
 {
     public class HomeController : Controller
@@ -295,7 +296,7 @@ namespace PI.Controllers
                     case "生产一组":teamleader = "167699"; attrname = "曹燕"; break;    
                     case "生产二组": teamleader = "167699"; attrname = "曹燕"; break;
                     case "生产三组": teamleader = "167699"; attrname = "曹燕"; break;
-                    case "技术部": teamleader = "131903"; attrname = "吕涛"; break;//吕涛
+                    case "技术部": teamleader = "119065"; attrname = "邵余婷"; break;//邵余婷
                         case "设备部": teamleader = "186644"; attrname = "陈吉如"; break;//陈吉如
                     case "质量部": teamleader = "119701"; attrname = "郑倩"; break;//郑倩
                     case "计划物控部":teamleader = "116882"; attrname = "陈丽"; break;//陈丽
@@ -694,7 +695,7 @@ namespace PI.Controllers
         }
 
         //批量上传功能
-        public async Task<IActionResult> TMFileImport(string uploaduser)
+        public async Task<IActionResult> TMFileImport(string uploaduser,string userimport)
         {
             var files = Request.Form.Files;
             string filePath = "";
@@ -780,7 +781,11 @@ namespace PI.Controllers
                                             string runame = worksheet.Cells[row, 1].Value.ToString();
                                             string rrname = worksheet.Cells[row, 2].Value.ToString();
                                             string rdep = worksheet.Cells[row, 3].Value.ToString();
-                                            string reamil = "pi@longi-silicon.com";
+                                            string reamil = "pi@longigroup.com";
+                                            if (userimport == "userimport")
+                                            {
+                                                reamil = worksheet.Cells[row,4].Value.ToString(); ;
+                                            }
                                             string rpass = "123456";
                                             var user = new User { UserName = runame, Email = reamil, Department = rdep, CreateOn = DateTime.Now, LastTime = DateTime.Now, RealName = rrname };
                                             var result = await UserManager.CreateAsync(user, rpass);
@@ -796,9 +801,14 @@ namespace PI.Controllers
                                     }
                                 }
                             }
+                            if(userimport == "userimport")
+                            {
+                              string ss = JsonConvert.SerializeObject(new { Success = true, exinfo ="批量导入成功" });
+                              return Content(ss);
+                            }
 
-                            //判断是否有空内容，防止一半上传-这里实在太多了。。。
-                            for (int row = 2; row <= rowCount; row++)
+                        //判断是否有空内容，防止一半上传-这里实在太多了。。。
+                        for (int row = 2; row <= rowCount; row++)
                             {
                                 for (int col = 1; col <= ColCount; col++)
                                 {

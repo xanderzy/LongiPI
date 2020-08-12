@@ -675,7 +675,7 @@ namespace PI.Areas.Admin.Controllers
                             case "生产一组": duijieren = "167699"; break;   //曹燕
                             case "生产二组": duijieren = "167699"; break;
                             case "生产三组": duijieren = "167699"; break;
-                            case "技术部": duijieren = "131903"; break;//吕涛
+                            case "技术部": duijieren = "119065"; break;//邵余婷
                             case "设备部": duijieren = "186644"; break;//陈吉如
                             case "质量部": duijieren = "119701"; break;//郑倩
                             case "计划物控部": duijieren = "116882"; break;//陈丽
