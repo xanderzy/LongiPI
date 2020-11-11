@@ -28,7 +28,8 @@ namespace PI.Areas.Admin.Controllers
         private readonly DataContext _context;
         private IMailQueueService _mailservice;
         private IStatusLogRepository _statuslog;
-        public ManageController(ITopicRepository topic, UserManager<User> userManager, DataContext context, ITopicReplyRepository reply, IMarkInfoRepository markinfo, IMailQueueService mailservice, IMyFileRepository myfile, IStatusLogRepository statuslog, IBonusRepository bonus)
+        private IReferkeyRepository _referkey;
+        public ManageController(ITopicRepository topic, UserManager<User> userManager, DataContext context, ITopicReplyRepository reply, IMarkInfoRepository markinfo, IMailQueueService mailservice, IMyFileRepository myfile, IStatusLogRepository statuslog, IBonusRepository bonus,IReferkeyRepository referkey)
         {
             _topic = topic;
             UserManager = userManager;
@@ -39,6 +40,7 @@ namespace PI.Areas.Admin.Controllers
             _mailservice = mailservice;
             _myfile = myfile;
             _statuslog = statuslog;
+            _referkey = referkey;
         }
 
         public IActionResult Index()
@@ -105,7 +107,7 @@ namespace PI.Areas.Admin.Controllers
                 MailBox mymail = new MailBox();
                 mymail.Subject= "请审核提案-" + topic.Title;
                 mymail.Body= @"<p>" + u.RealName + "您好：</p>" +
-                           "<p>请审核提案：<a href=\"http://10.6.6.199/User/Mycheck \" target=\"_blank\">" + topic.Title + "</a></p>";
+                           "<p>请审核提案：<a href=\"http://10.6.6.193/User/Mycheck \" target=\"_blank\">" + topic.Title + "</a></p>";
                 mymail.IsHtml = true;
                 mymail.To = u.Email.Split(',');
                 _mailservice.Enqueue(mymail);
@@ -135,7 +137,79 @@ namespace PI.Areas.Admin.Controllers
                 return Content(dtss);
             }
         }
- 
+        public IActionResult SystemSet()
+        {
+            return View();
+        }
+
+        //获取配置数据
+        public IActionResult GetSystemdata(int page, int limit)
+        {
+            try
+            {
+                var sysdata = _referkey.List().Skip((page - 1) * limit).Take(limit).OrderByDescending(r => r.Keys).ToList();
+                int total = _referkey.List().Count();
+                string str = JsonConvert.SerializeObject(new { code = 0, count = total, msg = "查询成功", data = sysdata });
+                return Content(str);
+            }
+            catch (Exception ex)
+            {
+                string str = JsonConvert.SerializeObject(new { code = 1, msg = "查询失败" });
+                return Content(str);
+            }
+        }
+
+        //更改配置数据
+        public IActionResult SystemdataEdit(string Keys, string StrVal1, string StrVal2, string StrVal3, string StrVal4, int NumVal1,string Id)
+        {
+            try
+            {
+                var referobj = _referkey.List(r => r.Id == Convert.ToInt32(Id)).FirstOrDefault();
+                referobj.Keys = Keys;
+               referobj.StrVal1 = StrVal1;
+               referobj.StrVal2 = StrVal2;
+               referobj.StrVal3 = StrVal3;
+               referobj.StrVal4 = StrVal4;
+               referobj.NumVal1 = NumVal1;
+                _referkey.Edit(referobj);
+                string str = JsonConvert.SerializeObject(new { code =0, msg = "更改成功" });
+                return Content(str);
+
+            }
+            catch (Exception ex)
+            {
+                string str = JsonConvert.SerializeObject(new { code = 1, msg =ex.ToString()});
+                return Content(str);
+            }
+        }
+
+        public IActionResult AddReferdata(string Keys, string StrVal1, string StrVal2, string StrVal3, string StrVal4, int NumVal1)
+        {
+            try { 
+           _referkey.Add(new Referkey
+           {
+               Keys = Keys,
+               StrVal1 = StrVal1,
+               StrVal2 = StrVal2,
+               StrVal3 = StrVal3,
+               StrVal4 = StrVal4,
+               NumVal1 = NumVal1,
+               CreateDate = DateTime.Now
+           });
+            string str = JsonConvert.SerializeObject(new { success = true, msg = "添加成功" });
+            return Content(str);
+            }
+            catch (Exception ex)
+            {
+                string str = JsonConvert.SerializeObject(new { success = false, msg = ex.ToString()});
+                return Content(str);
+            }
+        }
+
+
+
+
+
         //驳回页面
         public IActionResult HideIndex()
         {
@@ -670,30 +744,32 @@ namespace PI.Areas.Admin.Controllers
                         string fileupload = _myfile.List(r => r.TopicId == maid && r.FileIcon == "W").Select(r => r.Uploader).FirstOrDefault();
                         string duijieren = "";
                         var nu = UserManager.FindByNameAsync(topic.UserName).Result;
-                        switch (nu.Department)
+                        duijieren = _referkey.List(r => r.Keys == "teamleader" && r.StrVal3 == nu.Department).FirstOrDefault().StrVal1;
+                        /*switch (nu.Department)
                         {
-                            case "生产一组": duijieren = "167699"; break;   //曹燕
-                            case "生产二组": duijieren = "167699"; break;
-                            case "生产三组": duijieren = "167699"; break;
-                            case "技术部": duijieren = "119065"; break;//邵余婷
-                            case "设备部": duijieren = "186644"; break;//陈吉如
-                            case "质量部": duijieren = "119701"; break;//郑倩
-                            case "计划物控部": duijieren = "116882"; break;//陈丽
-                            case "仓储物流部": duijieren = "118092"; break;//封吟吟
-                            case "动力部": duijieren = "118881"; break;//杨欢
-                            case "采购履行部": duijieren = "116684"; break;//俞红
-                            case "财务部": duijieren = "111507"; break;//王佳
-                            case "IE运营部": duijieren = "122304"; break;//柴兆龙
-                            case "总经理办公室": duijieren = "118730"; break;//徐建英
-                            case "人力资源部": duijieren = "118359"; break;//吴春霞
-                        }
+                            case "生产一组": duijieren = "252381"; break;   //赵洋
+                            case "生产二组": duijieren = "252381"; break;
+                            case "生产三组": duijieren = "252381"; break;
+                            case "生产管理组": duijieren = "252381"; break;
+                            case "质量部": duijieren = "245626"; break;   //张卓然
+                            case "总经理办公室": duijieren = "251616"; break;   //田方
+                            case "计划物控部": duijieren = "245213"; break;   //陈芳
+                            case "技术部": duijieren = "194695"; break;   //严重菲
+                            case "设备部": duijieren = "194696"; break;   //高歌
+                            case "动力部": duijieren = "245208"; break;   //马腾
+                            case "仓储物流部": duijieren = "249943"; break;   //李真真
+                            case "人力资源部": duijieren = "264373"; break;   //段苇
+                            case "采购部": duijieren = "164060"; break;   //徐宾宏
+                            case "财务部": duijieren = "194695"; break;   //严重菲
+                            case "IE运营部": duijieren = "194695"; break;   //严重菲
+                        }*/
 
                         var fu = UserManager.FindByNameAsync(fileupload).Result;
                         var du = UserManager.FindByNameAsync(duijieren).Result;
                         temaillist = fu.Email + "," + du.Email;
                         tonamelist = fu.RealName + "," + du.RealName;
                         mymail.Body = @"<p>" + tonamelist + "您好：</p>" +
-                                    "<p>您的完结提案：<a href=\"http://10.6.6.199/Topic/Index/" + maid + "\"  target=\"_blank\">" + topic.Title + "</a></p>" +
+                                    "<p>您的完结提案：<a href=\"http://10.6.6.193/Topic/Index/" + maid + "\"  target=\"_blank\">" + topic.Title + "</a></p>" +
                                     "<p>基地评分为"+topic.TopicMark+"。根据总部规定，大于等于61分的提案需要重新走OA流程由总部审批</p>" +
                                     "请在OA中填写相关信息:首页》流程管理》管理支持与服务类》企业管理类》组件事业部-提案改善流程";
                         mymail.IsHtml = true;

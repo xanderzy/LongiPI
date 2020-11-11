@@ -59,6 +59,7 @@ namespace PI
             services.AddSingleton<IMailQueueManager, MailQueueManager>();
             services.AddSingleton<IMailQueueService, MailQueueService>();
             services.AddSingleton<IMailQueueProvider, MailQueueProvider>();
+            services.AddSingleton<IReferkeyRepository, ReferkeyRepository>();
             services.AddScoped<IUserServices, UserServices>();
             services.AddScoped<UserServices>();
             services.AddMemoryCache();
@@ -97,7 +98,7 @@ namespace PI
                     defaults: new { action = "Index" });
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Chart}/{action=Index}/{id?}");
+                    template: "{controller=Home}/{action=Index}/{id?}");
                 routes.MapRoute("downloadtry",
                  "{controller}/{action}/{Parma1}/{Parma2}",
                     new { controller = "", action = "" },

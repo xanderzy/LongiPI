@@ -91,7 +91,8 @@ namespace PI.Controllers
                 r.Title,
                 r.CreateOn,
                 r.NodeId,
-                r.User.RealName
+                r.User.RealName,
+                r.User.Department
             });
             if (skey != null&& skey !="")
             {

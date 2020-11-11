@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -69,6 +70,30 @@ namespace PI.Controllers
             return Content("信息错误");
         }
 
-       
+        [HttpPost]
+         public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = new User { UserName = model.UserName.Trim(), Email = model.Email, Department = model.Department, CreateOn = DateTime.Now, LastTime = DateTime.Now, RealName = model.RealName.Trim() };
+                var result = await UserManager.CreateAsync(user, model.Password);
+                if (result.Succeeded)
+                {
+                    if (user.UserName.ToLower().Equals("admin"))
+                    {
+                        await UserManager.AddClaimAsync(user, new Claim("Admin", "Allowed"));
+                    }
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    return Content("注册失败");
+                }
+
+            }
+            return Content("注册信息填写不完整");
+        }
+
+
     }
 }

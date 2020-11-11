@@ -70,7 +70,7 @@
         var nowindex = 1;
         var page = 1; //设置首页页码
         var limit = 15;  //设置一页显示的条数
-        var total;    //总条数-暂时设置默认值为1页
+        var total=15;    //总条数-暂时设置默认值为1页
 
         $("#titlesearch").on('keydown', function () {
             if (event.keyCode == 13) {
@@ -109,8 +109,9 @@
                             var typehtml = '';
                                 for (var i = 0; i < data1.length; i++) {
                                     if (data1[i].Type == 1) { typehtml = '<span class="layui-badge layui-bg-gray">未派发</span><a href="javascript:void(0)" onclick="subgo(' + data1[i].Id + ')"><i class="layui-icon layui-icon-delete" style="font-size: 30px; color: #1E9FFF;"></i></a>'; }
-                                    if (data1[i].Type == 3) { typehtml = '<span class="layui-badge layui-bg-gray">管理员审核中</span>'; }
-                                    if (data1[i].Type == 2) { typehtml = '<span class="layui-badge layui-bg-gray">审核中</span>'; }
+                                    if (data1[i].Type == 3) {
+                                        typehtml = '<span class="layui-badge layui-bg-gray">管理员审核中</span><a href="javascript:void(0)" onclick="subgo(' + data1[i].Id + ')"><i class="layui-icon layui-icon-delete" style="font-size: 30px; color: #1E9FFF;"></i></a>'; }
+                                    if (data1[i].Type == 2) { typehtml = '<span class="layui-badge layui-bg-gray">审核中</span><a href="javascript:void(0)" onclick="subgo(' + data1[i].Id + ')"><i class="layui-icon layui-icon layui-icon-delete" style="font-size: 30px; color: #1E9FFF;"></i></a>'; }
                                     if (data1[i].Type == 4) { typehtml = '<span class="layui-badge layui-bg-red">实施中</span>'; }
                                     if (data1[i].Type == 5) { typehtml = '<span class="layui-badge layui-bg-green">基地评分中</span>'; }
                                     if (data1[i].Type == 7) { typehtml = '<span class="layui-badge layui-bg-green">总部打分中</span>'; }
@@ -124,12 +125,14 @@
                                     html += '<i>创建于' + data1[i].CreateOn+ '</i>';
                                 html += '<em>' + data1[i].ReplyCount + '参与</em>';
                                 html +='</li>'
-                               $("#mytopicinfo").empty().append(html);
                             }
+                             $("#mytopicinfo").empty().append(html);
                             
                         }
                     });
         }
+
+         
 
         //删除按钮
         function subgo(deid) {
@@ -163,19 +166,15 @@
   function getPage(looks) {
             layui.use('laypage', function () {
                 var laypage = layui.laypage;
-                var nowshows = looks
-                //执行一个laypage实例
-                laypage.render({
+                 laypage.render({
                     elem: 'pagetool' //注意，这里的 test1 是 ID，不用加 # 号
                     ,count: total, //数据总数，从服务端得到
                     limit: limit,   //每页条数设置
                     jump: function (obj, first) {
                         page = obj.curr;  //改变当前页码
                         limit = obj.limit;
-                        //首次不执行
-                       loadData(nowshows)  //加载数据
-                        
-                    }
+                        loadData(looks)  //加载数据
+                     }
                 });
             });
         }

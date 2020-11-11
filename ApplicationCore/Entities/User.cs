@@ -17,5 +17,6 @@ namespace ApplicationCore.Entities
         public int Score { get; set; }
         public DateTime CreateOn { get; set; }
         public DateTime LastTime { get; set; }
+
     }
 }

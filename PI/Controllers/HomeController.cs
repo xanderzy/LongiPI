@@ -31,9 +31,10 @@ namespace PI.Controllers
         private ITopicReplyRepository _reply;
         private IStatusLogRepository _statuslog;
         private IMailQueueService _mailservice;
+        private IReferkeyRepository _referkey;
 
 
-        public HomeController(ITopicRepository topic, UserManager<User> userManager, IMyFileRepository myfile, IHostingEnvironment hostingEnv, DataContext context, ITopicReplyRepository reply,IStatusLogRepository statuslog, IMailQueueService mailservice)
+        public HomeController(ITopicRepository topic, UserManager<User> userManager, IMyFileRepository myfile, IHostingEnvironment hostingEnv, DataContext context, ITopicReplyRepository reply,IStatusLogRepository statuslog, IMailQueueService mailservice, IReferkeyRepository referkey)
         {
             _topic = topic;
             UserManager = userManager;
@@ -43,8 +44,10 @@ namespace PI.Controllers
             _reply = reply;
             _statuslog = statuslog;
             _mailservice = mailservice;
+            _referkey = referkey;
+
         }
-       
+
         //获取首页所有信息
         public IActionResult Index(string looks, string topicname)
         {
@@ -290,24 +293,28 @@ namespace PI.Controllers
             if (type == "2")
             {
                 if (!string.IsNullOrEmpty(sugdep)) {
-                //直接去部门对接人那里
-                switch (sugdep)
+                    //直接去部门对接人那里
+                    var temskey = _referkey.List(r => r.Keys == "teamleader" && r.StrVal3 == sugdep).FirstOrDefault();
+                    teamleader = temskey.StrVal1;
+                    attrname = temskey.StrVal2;
+                    /* switch (sugdep)
                 {
-                    case "生产一组":teamleader = "167699"; attrname = "曹燕"; break;    
-                    case "生产二组": teamleader = "167699"; attrname = "曹燕"; break;
-                    case "生产三组": teamleader = "167699"; attrname = "曹燕"; break;
-                    case "技术部": teamleader = "119065"; attrname = "邵余婷"; break;//邵余婷
-                        case "设备部": teamleader = "186644"; attrname = "陈吉如"; break;//陈吉如
-                    case "质量部": teamleader = "119701"; attrname = "郑倩"; break;//郑倩
-                    case "计划物控部":teamleader = "116882"; attrname = "陈丽"; break;//陈丽
-                        case "仓储物流部": teamleader = "118092"; attrname = "封寅寅"; break;//封吟吟
-                    case "动力部": teamleader = "118881"; attrname = "杨欢"; break;//杨欢
-                    case "采购履行部": teamleader = "116684"; attrname = "俞红"; break;//俞红
-                    case "财务部": teamleader = "111507"; attrname = "王佳"; break;//王佳
-                    case "IE运营部": teamleader = "122304"; attrname = "柴兆龙"; break;//柴兆龙
-                    case "总经理办公室": teamleader = "118730"; attrname = "徐建英"; break;//徐建英
-                    case "人力资源部": teamleader = "118359"; attrname = "吴春霞"; break;//吴春霞
-                    }
+                    case "生产一组":teamleader = "252381"; attrname = "赵洋"; break;    
+                    case "生产二组": teamleader = "252381"; attrname = "赵洋"; break;
+                    case "生产三组": teamleader = "252381"; attrname = "赵洋"; break;
+                    case "生产管理组": teamleader = "252381"; attrname = "赵洋"; break;
+                    case "质量部": teamleader = "245626"; attrname = "张卓然"; break;
+                    case "总经理办公室": teamleader = "251616"; attrname = "田方"; break;
+                    case "计划物控部": teamleader = "245213"; attrname = "陈芳"; break;
+                        case "技术部": teamleader = "194695"; attrname = "严重菲"; break;
+                        case "设备部": teamleader = "194696"; attrname = "高歌"; break;
+                        case "动力部": teamleader = "245208"; attrname = "马腾"; break;
+                        case "仓储物流部": teamleader = "249943"; attrname = "李真真"; break;
+                        case "人力资源部": teamleader = "264373"; attrname = "段苇"; break;
+                        case "采购部": teamleader = "164060"; attrname = "徐宾宏"; break;
+                        case "财务部": teamleader = "194695"; attrname = "严重菲"; break;
+                        case "IE运营部": teamleader = "194695"; attrname = "严重菲"; break;
+                    }*/
                 }
                 else
                 {
@@ -358,7 +365,7 @@ namespace PI.Controllers
                 MailBox mymail = new MailBox();
                 mymail.Subject = "请审核提案-" +title;
                 mymail.Body = @"<p>" + truser + "您好：</p>" +
-                           "<p>请审核提案：<a href=\"http://10.6.6.199/User/Mycheck \" target=\"_blank\">" + title + "</a></p>";
+                           "<p>请审核提案：<a href=\"http://10.6.6.193/User/Mycheck \" target=\"_blank\">" + title + "</a></p>";
                 mymail.IsHtml = true;
                 var tu= UserManager.FindByNameAsync(teamleader).Result;
                 mymail.To = tu.Email.Split(',');
@@ -421,8 +428,12 @@ namespace PI.Controllers
                 return Content(resstr);
             }
         }
+        public IActionResult NoReg()
+        {
+            return View();
+        }
 
-       
+
 
         public IActionResult AllTopics()
         {
@@ -469,14 +480,14 @@ namespace PI.Controllers
         //提案报表功能
         public IActionResult GetReport(int limit, int page, string title, string username, string status, string startdate, string enddate, string department, string acdepartment,int setimef)
         {
-            var result = from a in _context.Topics
+             var result = from a in _context.Topics
                          join ar in _context.Users
                          on a.UserId equals ar.Id
                          join c in _context.Users
                          on a.TeamLeader equals c.UserName
                          into t
                          from ac in t.DefaultIfEmpty()
-                         where a.UserName!="admin"
+                         where a.UserName != "admin"
                          select new
                          {
                              a.Id,
@@ -781,7 +792,7 @@ namespace PI.Controllers
                                             string runame = worksheet.Cells[row, 1].Value.ToString();
                                             string rrname = worksheet.Cells[row, 2].Value.ToString();
                                             string rdep = worksheet.Cells[row, 3].Value.ToString();
-                                            string reamil = "pi@longigroup.com";
+                                            string reamil = "pi@longi-silicon.com";
                                             if (userimport == "userimport")
                                             {
                                                 reamil = worksheet.Cells[row,4].Value.ToString(); ;

@@ -30,12 +30,12 @@ namespace PI.Controllers
         private IMyFileRepository _myfile;
         //private IHostingEnvironment _hostingEnv;
         private readonly DataContext _context;
-        public WeChatController(ITopicRepository topic, ITopicReplyRepository reply, UserManager<User> userManager, IMyFileRepository myfile, DataContext context, IStatusLogRepository statuslog, SignInManager<User> signInManager)
+        public WeChatController(ITopicRepository topic, ITopicReplyRepository reply, UserManager<User> userManager,IMyFileRepository myfile, DataContext context, IStatusLogRepository statuslog, SignInManager<User> signInManager)
         {
             _topic = topic;
             _reply = reply;
             _myfile = myfile;
-            UserManager = userManager;
+             UserManager = userManager;
             SignInManager = signInManager;
             // _hostingEnv = hostingEnv;
             _context = context;
@@ -50,9 +50,27 @@ namespace PI.Controllers
 
         }
 
-        [HttpPost]
+       [HttpPost]
+         public async Task<IActionResult> WxLogin(string username, string password)
+        {
+            string str = "";
+           var result = await SignInManager.PasswordSignInAsync(username, password, false, lockoutOnFailure: false);
+            if (!result.Succeeded)
+            {
+               str = JsonConvert.SerializeObject(new { code = 1, msg = "工号密码错误" });
+               return Content(str);
+            }
+            else
+            {
+                str = JsonConvert.SerializeObject(new { code = 0, msg = "登陆成功", data = username });
+                return Content(str);
+            }
+             
+        }
+
+        //[HttpPost]
         //跟微信服务器对接
-        public async Task<IActionResult> WxLogin(string code, string username, string password, int type)
+        /*public async Task<IActionResult> WxLogin(string code, string username, string password, int type)
         {
             //暂时不加密了，没啥影响
             string str = "";
@@ -96,7 +114,7 @@ namespace PI.Controllers
                         return Content(str);
                     }
                     //生成thirdsession 
-                    /* MD5 md5 = MD5.Create();
+                     MD5 md5 = MD5.Create();
                      byte[] bs = Encoding.UTF8.GetBytes(ReMsg.openid + ReMsg.session_key);
                      byte[] hs = md5.ComputeHash(bs);
                      StringBuilder sb = new StringBuilder();
@@ -104,7 +122,7 @@ namespace PI.Controllers
                      {
                          sb.Append(b.ToString("x2"));
                      }
-                     thirdsession = sb.ToString();*/
+                     thirdsession = sb.ToString();
                     //向数据库插入记录
                     thirdsession = username;
                     _context.Set<UserMessage>().Add(new UserMessage
@@ -137,7 +155,7 @@ namespace PI.Controllers
                 str = JsonConvert.SerializeObject(new { code = 1, msg = "登陆失败，无法获取微信code" });
                 return Content(str);
             }
-        }
+        }*/
 
         public IActionResult CheckByTeamLeader(int tid)
         {

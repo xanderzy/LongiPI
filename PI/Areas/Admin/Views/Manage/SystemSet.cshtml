@@ -1,0 +1,204 @@
+﻿
+@{
+    ViewData["Title"] = "用户管理";
+}
+<div style="margin:20px">
+    <span class="layui-breadcrumb">
+        <a href="">系统管理</a>
+        <a><cite>系统参数设置</cite></a>
+    </span>
+    <div class="layui-form" style="margin-top:20px">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <button class="layui-btn" id="newset">新建系统值</button>
+            </div>
+        </div>
+    </div>
+    <table id="systemsetindex" lay-filter="system-set"></table>
+    <script type="text/html" id="syssetbar">
+        <a class="layui-btn layui-btn-xs" lay-event="editdata">编辑</a>
+    </script>
+    <div id='systemsetpage' style="display : none">
+        <div class="layui-form" lay-filter="system-data-form" style="padding: 20px 30px 0 0;">
+            <div class="layui-form-item">
+                <label class="layui-form-label">key值</label>
+                <div class="layui-input-block">
+                    <input type="text" name="Keys" lay-verify="required" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">值1</label>
+                <div class="layui-input-block">
+                    <input type="text" name="StrVal1" lay-verify="required" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">值2</label>
+                <div class="layui-input-block">
+                    <input type="text" name="StrVal2"   autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">值3</label>
+                <div class="layui-input-block">
+                    <input type="text" name="StrVal3"   autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">值4</label>
+                <div class="layui-input-block">
+                    <input type="text" name="StrVal4"   autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">数值1</label>
+                <div class="layui-input-block">
+                    <input type="text" name="NumVal1"  autocomplete="off" class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item" style="margin-top:10px">
+                <label class="layui-form-label"></label>
+                <div class="layui-input-block">
+                    <input type="button" lay-submit lay-filter="systemsetsubmit" id="syseditbtn" value="确认" class="layui-btn" style="display:none">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script>
+        var table = layui.table;
+        var form = layui.form;
+        var upload = layui.upload;
+
+        
+       var tableIns=table.render({
+            elem: '#systemsetindex'
+            , url: '/Admin/Manage/GetSystemdata' //数据接口
+            , page: true //开启分页
+            , limit: 10 //每页显示行数
+            , id: 'systemsettable'
+            , cols: [[
+                { field: 'Keys', title: 'key值',width:'20%'}
+                , { field: 'StrVal1', title: '值1' ,width:'12%'}
+                , { field: 'StrVal2', title: '值2',width:'12%' }
+                , { field: 'StrVal3', title: '值3',width:'12%' }
+                , { field: 'StrVal4', title: '值4' ,width:'12%'}
+                , { field: 'NumVal1', title: '数值1',width:'12%' }
+                , { title: '操作', toolbar: '#syssetbar',width: '20%'}
+            ]]
+        });
+
+        $("#newset").on('click', function () {
+            layer.open({
+                type: 1,   // 6可以使表单超出部分不被遮挡
+                title: '添加系统数据',
+                area: ['400px', '600'],
+                btn: ['确认', '取消'],
+                btnAlign: 'c',   // 按钮居中
+                content: $('#systemsetpage').html(),
+                success: function (layero, index) {
+                    form.render();
+                    form.val("system-data-form", {
+                        "Keys":''
+                        , "StrVal1": ''
+                        , "StrVal2": ''
+                        , "StrVal3": ''
+                        , "StrVal4": ''
+                        , "NumVal1":0
+                    });
+                    form.on('submit(systemsetsubmit)', function (data) {     // 打印data就可以看到form表单提交的数据
+                        var filed = data.field;
+                         
+                        $.ajax({
+                            type: "post",
+                            url: "/Admin/Manage/AddReferdata",
+                            data: filed,
+                            success: function (data) {
+                                var res = JSON.parse(data);
+                                if (res.success) {
+                                    layer.msg("添加成功");
+                                    layer.close(index);
+                                    tableIns.reload({
+                                        page: {
+                                            curr: 1 //重新从第 1 页开始
+                                        }
+                                    });
+                                } else {
+                                    layer.msg(res.msg);
+                                }
+                            }
+                        });
+                    });
+                },
+                yes: function (index, layero) {
+                    layero.find('#syseditbtn').click(); 
+                },
+                btn2: function (index, layero) {
+                    layer.close(index);
+                }
+            });
+        })
+        
+
+        //单元格编辑框  tool
+        table.on('tool(system-set)', function (obj) {
+            var layer = layui.layer;
+            var data = obj.data;
+              if (obj.event === 'editdata') {
+                layer.open({
+                    type: 1,   // 6可以使表单超出部分不被遮挡
+                    title: '编辑系统数据',
+                    area: ['400px', '600'],
+                    btn: ['确认', '取消'],
+                    btnAlign: 'c',   // 按钮居中
+                    content: $('#systemsetpage').html(),
+                    success: function (layero, index) {
+                        form.render();
+                        form.val("system-data-form", {
+                            "Keys": data.Keys
+                            , "StrVal1": data.StrVal1
+                            , "StrVal2": data.StrVal2
+                            , "StrVal3": data.StrVal3
+                            , "StrVal4": data.StrVal4
+                            , "NumVal1": data.NumVal1
+                         });
+                        //form.render();    // 表单渲染
+                        form.on('submit(systemsetsubmit)', function (fdata) {     
+                            var filed = fdata.field;
+                            filed.Id=data.Id
+                              $.ajax({
+                                type: "post",
+                                url: "/Admin/Manage/SystemdataEdit",//对应controller的URL
+                                data: filed,
+                                success: function (data) {
+                                    var res = JSON.parse(data);
+                                    if (res.success) {
+                                        layer.msg("修改成功");
+                                        layer.close(index);
+                                        tableIns.reload({
+                                            page: {
+                                                curr: 1 //重新从第 1 页开始
+                                            }
+                                        });
+                                    } else {
+                                        layer.msg(res.msg);
+                                    }
+                                }
+                            });
+                        });
+                    },
+                    yes: function (index, layero) {
+                        layero.find('#syseditbtn').click();    // 这一句就是点击确认按钮触发form的隐藏提交
+                    },
+                    btn2: function (index, layero) {
+                        layer.close(index);
+                    }
+                });
+            }
+        })
+    </script>
+}

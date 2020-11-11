@@ -38,6 +38,7 @@
                                     <option value="生产一组">生产一组</option>
                                     <option value="生产二组">生产二组</option>
                                     <option value="生产三组">生产三组</option>
+                                    <option value="生产三组">生产管理组</option>
                                     <option value="设备部">设备部</option>
                                     <option value="动力部">动力部</option>
                                     <option value="质量部">质量部</option>
@@ -199,8 +200,35 @@
             str = str.replace(/&nbsp;/ig, '')
             return str
         }
+        editor2.customConfig.pasteIgnoreImg = true
+        editor2.customConfig.uploadImgServer = '/Tool/FileUpload/'; //设置上传文件的服务器路径
+        editor2.customConfig.uploadImgParams = {
+            uploadtype: 'P',
+            tid: 0
+        }
+        editor2.customConfig.uploadImgMaxSize = 4 * 1024 * 1024; // 将图片大小限制为 3M
+        //自定义上传图片事件
+        editor2.customConfig.uploadImgHooks = {
+            before: function (xhr, editor, files) {
+
+            },
+            success: function (xhr, editor, result) {
+                var kk = $("#fileid").val();
+                kk = kk == "0" ? result.Fid : kk + "," + result.Fid;
+                $("#fileid").val(kk);
+            },
+            fail: function (xhr, editor, result) {
+                layer.alert('图片插入失败');
+            },
+            error: function (xhr, editor) {
+                layer.alert("上传图片异常！");
+            },
+            timeout: function (xhr, editor) {
+                layer.alert("上传超时！")
+            }
+        }
         editor2.customConfig.zIndex = 1;
-        custconfig.splice(11, 1);
+        //custconfig.splice(11, 1);
         editor2.customConfig.menus = custconfig;
         editor2.create();
     </script>

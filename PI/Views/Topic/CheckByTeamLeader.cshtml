@@ -231,7 +231,50 @@
                 layer.alert("转办提案不得添加实施人，请删除实施人");
                 return;
             } else {
-                layer.confirm('提案转办会自动转入管理员审核，确认要转办提案么？', {
+                layer.prompt({
+                    formType: 0,
+                    value: '',
+                    title: '请输入转办人员姓名',
+                }, function (value, index, elem) {
+                        if (value === '') {
+                            return false
+                        }
+                         $.ajax({
+                            type: "GET",
+                            url: "/Tool/GetUserInfo",
+                            data: { realname: value},
+                            success: function (res) {
+                                let zbobj = JSON.parse(res)
+                                if (Number(zbobj.code) === 0) {
+                                    var zbtid = $("#changetl").data("id");
+                                     $.ajax({
+                                        type: "POST",
+                                        url: "/Topic/ChangeTeamLeader",
+                                        data: { newtl: zbobj.data.UserName, tid: zbtid },
+                                        success: function (data) {
+                                            var ctobj = JSON.parse(data);
+                                            if (ctobj.code == 0) {
+                                                layer.close(index)
+                                                layer.msg("转办成功", {
+                                                    icon: 1
+                                                    , time: 2000
+                                                }, function () {
+                                                    window.location.href = "/User/MyCheck"
+                                                });
+                                            } else {
+                                                layer.alert(ctobj.msg);
+                                            }
+                                        }
+                                    })
+                                } else {
+                                    layer.close(index)
+                                    layer.alert('查询不到此用户')
+                                }
+                            }
+                        })
+              })
+                
+                /*layer.confirm('提案转办会自动转入管理员审核，确认要转办提案么？', {
                     btn: ['确定', '取消'] //按钮
                 }, function () {
                     var zbtid = $("#changetl").data("id");
@@ -255,7 +298,7 @@
                     })
                 }, function () {
                     layer.close()
-                });
+                });*/
             }
         })
 

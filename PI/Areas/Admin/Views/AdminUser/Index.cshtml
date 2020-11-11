@@ -22,7 +22,7 @@
     </div>
     <table id="adminuserindex" lay-filter="lay-admin-edit"></table>
     <div id='bindPage' style="display : none">
-        <div class="layui-form" lay-filter="layuiadmin-form-admin" style="padding: 20px 30px 0 0;">
+        <div class="layui-form" lay-filter="layuiadmin-form-admin" style="padding: 20px 30px 0 0;height:400px">
             <div class="layui-form-item">
                 <label class="layui-form-label">工号</label>
                 <div class="layui-input-block">
@@ -50,6 +50,7 @@
                         <option value="生产一组">生产一组</option>
                         <option value="生产二组">生产二组</option>
                         <option value="生产三组">生产三组</option>
+                        <option value="生产三组">生产管理组</option>
                         <option value="设备部">设备部</option>
                         <option value="质量部">质量部</option>
                         <option value="计划物控部">计划物控部</option>
@@ -113,8 +114,8 @@
             , page: true //开启分页
             , limit: 10 //每页显示行数
             , id: 'layadminuser'
-            , cols: [[ //表头
-                , { field: 'UserName', title: '工号',width:'10%'}
+            , cols: [[ 
+                { field: 'UserName', title: '工号',width:'10%'}
                 , { field: 'RealName', title: '姓名' ,width:'10%'}
                 , { field: 'Department', title: '部门',width:'10%' }
                 , { field: 'Email', title: '邮箱',width:'10%' }

@@ -29,6 +29,7 @@
                         <option value="生产一组">生产一组</option>
                         <option value="生产二组">生产二组</option>
                         <option value="生产三组">生产三组</option>
+                        <option value="生产三组">生产管理组</option>
                         <option value="设备部">设备部</option>
                         <option value="动力部">动力部</option>
                         <option value="质量部">质量部</option>
@@ -95,7 +96,7 @@
                 , toolbar: true //导出打印工具栏
                 , id: 'testReload'
                  ,limit:10
-                , limits: [10,50,100, 200, 300,500]
+                , limits: [10,50,100, 200, 300,500,800]
                 , cols: [[ //表头
                     { field: 'UserName', title: '工号', width: '6%' }
                     , { field: 'RealName', title: '姓名', width: '6%' }
@@ -198,9 +199,8 @@
                 table.reload('testReload', {
                             page: {
                                 curr:currpar
-                    }
-                    , where: whereval
-                    });
+                    }, where: whereval
+                });
             }; 
 
             
@@ -273,7 +273,7 @@
                 height: "50px",                 //是否固定高度, 38px | auto
                 radio: false,                   //是否设置为单选模式
                 direction: "auto",
-                max: 3,                 //多选最多选择量           
+                max: 20,                 //多选最多选择量           
                 searchType: "title",    //搜索框的位置            
                 showCount: 0,           //多选的label数量, 0,负值,非数字则显示全部
             });
@@ -283,6 +283,7 @@
                     { "name": "生产一组", "value": "生产一组" },
                     { "name": "生产二组", "value": "生产二组" },
                     { "name": "生产三组", "value": "生产三组" },
+                    { "name": "生产管理组", "value": "生产管理组" },
                     { "name": "设备部", "value": "设备部" },
                     { "name": "动力部", "value": "动力部" },
                     { "name": "质量部", "value": "质量部" },
@@ -301,7 +302,7 @@
                 height: "50px",                 //是否固定高度, 38px | auto
                 radio: false,                   //是否设置为单选模式
                 direction: "auto",
-                max: 3,                 //多选最多选择量           
+                max:20,                 //多选最多选择量           
                 searchType: "title",    //搜索框的位置            
                 showCount: 0,           //多选的label数量, 0,负值,非数字则显示全部
             });

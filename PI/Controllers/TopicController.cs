@@ -348,7 +348,7 @@ namespace PI.Controllers
             mymail.Subject = "您参与了提案：" + topic.Title;
             
             mymail.Body = @"<p>" + tonamelist + "您好：</p>" +
-                        "<p>您参与了此提案：<a href=\"http://10.6.6.199/Topic/Index/" + id + "\"  target=\"_blank\">" + topic.Title + "</a></p>" +
+                        "<p>您参与了此提案：<a href=\"http://10.6.6.193/Topic/Index/" + id + "\"  target=\"_blank\">" + topic.Title + "</a></p>" +
                         "<p>请尽快完成改善，完成后请上传报告进行提案完结。</p>";
             mymail.IsHtml = true;
             mymail.To = temaillist.Split(',');
@@ -410,6 +410,22 @@ namespace PI.Controllers
                     Attr2=hidereason
                 });
                 var topic = _topic.GetById(htid);
+
+                var topicuser = UserManager.FindByNameAsync(topic.UserName).Result;
+
+
+                //发送驳回邮件
+                MailBox mymail = new MailBox();
+                mymail.Subject = "您的提案：" + topic.Title;
+                mymail.Body = @"<p>" + topicuser.RealName + "您好：</p>" +
+                            "<p>您的提案：<a href=\"http://10.6.6.199/Topic/Index/" + htid + "\"  target=\"_blank\">" + topic.Title + "</a>已被驳回。</p>" +
+                            "<p>驳回理由：" + hidereason + "</p>" +
+                            "<p>审核人：" + hidereason + "</p>";
+                mymail.IsHtml = true;
+                mymail.To = topicuser.Email.Split(',');
+                _mailservice.Enqueue(mymail);
+
+
                 topic.LastReplyUserId = ru.Id;
                 topic.LastReplyTime = DateTime.Now;
                 topic.Type = TopicType.Delete;

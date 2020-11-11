@@ -137,7 +137,7 @@
                 });
             }
             else if (obj.event === 'look') {
-                var showfirsthtml = '<div id="showdetail" class="site-content" style="padding:20px">' +
+                var showfirsthtml = '<div id="showdetail" style="padding:20px">' +
                     '<div class="site-title">' +
                     ' <h1>' + obj.data.Title + '</h1> ' +
                     '<div>' +
@@ -156,9 +156,9 @@
                     layer.open({
                                 type: 1,
                                 title: false,
-                                closeBtn: 0,
                                 shadeClose: true,
-                                area: ['700px', '400px'],
+                                closeBtn:false,
+                                area: ['1000px','600px'],
                                 content: showfirsthtml
                             })
                 }

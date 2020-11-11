@@ -21,10 +21,10 @@ namespace Infrastructure
         public DbSet<UserMessage> UserMessages { get; set; }
         public DbSet<UserCollection> UserTopics { get; set; }
 
+        public DbSet<Referkey> Referkeys { get; set; }
 
         public DbQuery<MergeData> MergeDatas { get; set; }
-        //public DbQuery<MonthTrend> MonthTrends { get; set; }
-        public DbQuery<Depalldata> Depalldatas { get; set; }
+         public DbQuery<Depalldata> Depalldatas { get; set; }
         public DbQuery<Depstatusdata> Depstatusdatas { get; set; }
 
         public DbQuery<DepMark> DepMark { get; set; }
@@ -50,6 +50,7 @@ namespace Infrastructure
             modelBuilder.Entity<MarkInfo>().ToTable("MarkInfo");
             modelBuilder.Entity<StatusLog>().ToTable("StatusLog");
             modelBuilder.Entity<Bonus>().ToTable("Bonus");
+            modelBuilder.Entity<Referkey>().ToTable("Referkey");
 
             /*modelBuilder.Query<MonthTrend>(v =>
             {
