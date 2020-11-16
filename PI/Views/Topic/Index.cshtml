@@ -383,7 +383,7 @@
                                 '<td>' + allrobj.data[i].username + '</td>' +
                                 '<td>' + allrobj.data[i].realname + '</td>' +
                                 '<td>' + allrobj.data[i].dep + '</td>' +
-                                '<td><button type="button" class="layui-btn layui-btn-danger" onclick=deluser("' + allrobj.data[i].realname + '",' + allrobj.data[i].rid + ',' + '0);>删除</button></td>'
+                                '<td><button type="button" class="layui-btn layui-btn-danger" onclick=deluser("' + allrobj.data[i].realname + '",' + allrobj.data[i].rid + ',' +i+');>删除</button></td>'
                             ' </tr>'
 
                             showallru += showrow
@@ -444,7 +444,7 @@
 
 
         //删除实施人
-        function deluser(drrn,drid, delrowid) {
+        function deluser(drrn, drid, delrowid) {
             //点击完结后才能进行操作。
             var fdrd = $("#finishta").data('delrid');
             var fdrn = $("#finishta").data('delusername');
