@@ -57,7 +57,7 @@ namespace PI.Controllers
                 await UserManager.UpdateAsync(user);
                 return RedirectToAction("UserInfo");
             }
-            return Content("信息错误");
+            return Content("信息格式异常");
         }
 
         
