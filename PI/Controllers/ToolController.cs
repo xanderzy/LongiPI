@@ -231,5 +231,12 @@ namespace PI.Controllers
             return Content(resfileinfo);
         }
 
+        public IActionResult GetTopicFile(int tid)
+        {   
+            var filelist=_myfile.List(r=>r.TopicId==tid&&r.FileIcon == "W"&&r.IsDelete==0).Select(r => new { r.Id}).ToList();
+            string resfileinfo = JsonConvert.SerializeObject(new { code = 0, msg = "获取成功", data = filelist });
+            return Content(resfileinfo);
+        }
+
     }
 }

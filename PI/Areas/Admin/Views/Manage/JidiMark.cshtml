@@ -23,8 +23,9 @@
 
     <table id="jidimark" lay-filter="jidimark"></table>
     <script type="text/html" id="jdmarkbar">
-         <a class="layui-btn layui-btn-xs" lay-event="jdmark">打分</a>
+        <a class="layui-btn layui-btn-xs" lay-event="jdmark">打分</a>
         <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="backtogood">驳回</a>
+        <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="downloadfile">下载附件</a>
     </script>
 </div>
 
@@ -69,7 +70,7 @@
                         return '<a href="/Topic/Index/' + d.Id + '"' + ' target="_blank" class="layui-table-link">' + d.Title + '</a>';
                     }
                 },
-                , { title: '操作', width: '20%', toolbar: '#jdmarkbar' }
+                { title: '操作', width: '20%', toolbar: '#jdmarkbar' }
             ]]
         });
 
@@ -86,8 +87,7 @@
 
         //单元格编辑框  tool
                 table.on('tool(jidimark)', function (obj) {
-                    var data = obj.data;
-                    if (obj.event === 'jdmark') {
+                     if (obj.event === 'jdmark') {
                         window.location.href = "/Topic/MarkByLeader?id=" + obj.data.Id
                     } else if (obj.event === 'backtogood') {
                         var tid = obj.data.Id
@@ -117,6 +117,24 @@
                                 }
                             })
                         })
+                    } else if (obj.event === 'downloadfile') {
+                         $.ajax({
+                             url: "/Tool/GetTopicFile",
+                             data: { tid: obj.data.Id},
+                             success: function (res) {
+                                 let resdata = JSON.parse(res)
+                                 resdata.data.forEach(item => {
+                                     let fileurl = '/Tool/Download/?fiid='+item.Id
+                                     const elt = document.createElement('a');
+                                     elt.setAttribute('href', fileurl);
+                                     //elt.setAttribute('download', item.FileName);
+                                     elt.style.display = 'none';
+                                     document.body.appendChild(elt);
+                                     elt.click();
+                                     document.body.removeChild(elt);
+                                 })
+                              }
+                         })
                     }
                 })
   

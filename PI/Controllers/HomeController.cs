@@ -365,7 +365,7 @@ namespace PI.Controllers
                 MailBox mymail = new MailBox();
                 mymail.Subject = "请审核提案-" +title;
                 mymail.Body = @"<p>" + truser + "您好：</p>" +
-                           "<p>请审核提案：<a href=\"http://10.6.6.193/User/Mycheck \" target=\"_blank\">" + title + "</a></p>";
+                           "<p>请审核提案：<a href=\"http://10.12.0.154/User/Mycheck \" target=\"_blank\">" + title + "</a></p>";
                 mymail.IsHtml = true;
                 var tu= UserManager.FindByNameAsync(teamleader).Result;
                 mymail.To = tu.Email.Split(',');

@@ -348,7 +348,7 @@ namespace PI.Controllers
             mymail.Subject = "您参与了提案：" + topic.Title;
             
             mymail.Body = @"<p>" + tonamelist + "您好：</p>" +
-                        "<p>您参与了此提案：<a href=\"http://10.6.6.193/Topic/Index/" + id + "\"  target=\"_blank\">" + topic.Title + "</a></p>" +
+                        "<p>您参与了此提案：<a href=\"http://10.12.0.154/Topic/Index/" + id + "\"  target=\"_blank\">" + topic.Title + "</a></p>" +
                         "<p>请尽快完成改善，完成后请上传报告进行提案完结。</p>";
             mymail.IsHtml = true;
             mymail.To = temaillist.Split(',');

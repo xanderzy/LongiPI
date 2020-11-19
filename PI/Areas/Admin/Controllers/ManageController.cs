@@ -107,7 +107,7 @@ namespace PI.Areas.Admin.Controllers
                 MailBox mymail = new MailBox();
                 mymail.Subject= "请审核提案-" + topic.Title;
                 mymail.Body= @"<p>" + u.RealName + "您好：</p>" +
-                           "<p>请审核提案：<a href=\"http://10.6.6.193/User/Mycheck \" target=\"_blank\">" + topic.Title + "</a></p>";
+                           "<p>请审核提案：<a href=\"http://10.12.0.154/User/Mycheck \" target=\"_blank\">" + topic.Title + "</a></p>";
                 mymail.IsHtml = true;
                 mymail.To = u.Email.Split(',');
                 _mailservice.Enqueue(mymail);
@@ -769,7 +769,7 @@ namespace PI.Areas.Admin.Controllers
                         temaillist = fu.Email + "," + du.Email;
                         tonamelist = fu.RealName + "," + du.RealName;
                         mymail.Body = @"<p>" + tonamelist + "您好：</p>" +
-                                    "<p>您的完结提案：<a href=\"http://10.6.6.193/Topic/Index/" + maid + "\"  target=\"_blank\">" + topic.Title + "</a></p>" +
+                                    "<p>您的完结提案：<a href=\"http://10.12.0.154/Topic/Index/" + maid + "\"  target=\"_blank\">" + topic.Title + "</a></p>" +
                                     "<p>基地评分为"+topic.TopicMark+"。根据总部规定，大于等于61分的提案需要重新走OA流程由总部审批</p>" +
                                     "请在OA中填写相关信息:首页》流程管理》管理支持与服务类》企业管理类》组件事业部-提案改善流程";
                         mymail.IsHtml = true;
