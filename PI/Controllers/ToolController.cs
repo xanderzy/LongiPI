@@ -72,7 +72,7 @@ namespace PI.Controllers
                 backfilename = realfilename + fileExt;
                 string newFileName = filedate + realfilename + fileExt;
                 filePath = webRootPath + cunfangfile + newFileName;
-                imgurl = "https://jxta.longi-silicon.com:9515" + cunfangfile+ newFileName;
+                imgurl = "https://zjproposal.longi-silicon.com:9514" + cunfangfile+ newFileName;
                 //imgurl= cunfangfile + newFileName;
                 try
                 {

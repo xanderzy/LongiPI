@@ -1,6 +1,6 @@
 ﻿@inject UserServices services
 @{
-     
+    var topicId = ViewBag.TopicId as object;
     var user = await services.User;
 }
 
@@ -91,6 +91,7 @@
                     <div class="layui-form-item">
                         <label class="layui-form-label">标题</label>
                         <div class="layui-input-block">
+                            <input type="hidden" value="@if (topicId != null) { @topicId } " id="topicId"/>
                             <input type="text" name="title" lay-verify="required" placeholder="请输入标题" autocomplete="off" class="layui-input" id="topictitle">
                         </div>
                     </div>
@@ -127,110 +128,113 @@
 @section scripts{
     <script src="~/js/wangEditor.min.js"></script>
     <script>
-        var custconfig = [
-            'head',  // 标题
-            'bold',  // 粗体
-            'fontSize',  // 字号
-            'fontName',  // 字体
-            'backColor',  // 背景颜色
-            'italic',  // 斜体
-            'underline',  // 下划线
-            'strikeThrough',  // 删除线
-            'foreColor',  // 文字颜色
-            'justify',  // 对齐方式
-            'table', // 表格
-            'image'  // 插入图片
-        ];
-        var E = window.wangEditor
-        var editor1 = new E('#wangeditor11')
-        editor1.customConfig.menus = custconfig
-        editor1.customConfig.pasteFilterStyle = true
-        editor1.customConfig.pasteTextHandle = function (content) {
-            // content 即粘贴过来的内容（html 或 纯文本），可进行自定义处理然后返回
-            if (content == '' && !content) return ''
-            var str = content
-            str = str.replace(/<xml>[\s\S]*?<\/xml>/ig, '')
-            str = str.replace(/<style>[\s\S]*?<\/style>/ig, '')
-            str = str.replace(/<\/?[^>]*>/g, '')
-            str = str.replace(/[ | ]*\n/g, '\n')
-            str = str.replace(/&nbsp;/ig, '')
-            return str
-        }
-        editor1.customConfig.pasteIgnoreImg = true
-        editor1.customConfig.uploadImgServer = '/Tool/FileUpload/'; //设置上传文件的服务器路径
-        editor1.customConfig.uploadImgParams = {
-            uploadtype: 'P',
-            tid: 0
-        }
-        editor1.customConfig.uploadImgMaxSize = 4 * 1024 * 1024; // 将图片大小限制为 3M
-        //自定义上传图片事件
-        editor1.customConfig.uploadImgHooks = {
-            before: function (xhr, editor, files) {
+        $(document).ready(function () {
+            // 初始化内容
+            var E = window.wangEditor
+            var editor1 = new E('#wangeditor11');
+            var editor2 = new E('#wangeditor22');
+            initWangEditor(editor1);
+            initWangEditor(editor2);
 
-            },
-            success: function (xhr, editor, result) {
-                var kk = $("#fileid").val();
-                kk = kk == "0" ? result.Fid : kk + "," + result.Fid;
-                $("#fileid").val(kk);
-            },
-            fail: function (xhr, editor, result) {
-                layer.alert('图片插入失败');
-            },
-            error: function (xhr, editor) {
-                layer.alert("上传图片异常！");
-            },
-            timeout: function (xhr, editor) {
-                layer.alert("上传超时！")
+            var topicId = $("#topicId").val();
+            if (!isNullOrUndefined(topicId)) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Topic/detail",
+                    async: false,
+                    data: { id: topicId },
+                    success: function (data) {
+                        var _data = JSON.parse(data);
+                        console.log(_data)
+                        //标题
+                        $("#topictitle").val(_data.data.Title);
+                        //类别
+                        var code = _data.data.Node.Id;
+                        console.log(code)
+                        var codeOptions = $("#topicnode option");
+                        for (var i = 0; i < codeOptions.length; i++) {
+                            if (code == $(codeOptions[i]).val()) {
+                                console.log(code)
+                                $(codeOptions[i]).select = true;
+                            }
+                        }
+                        
+                        editor1.txt.html(_data.data.Content)
+                        editor2.txt.html(_data.data.Suggest)
+                    }
+                });
+                
             }
-        }
-        editor1.customConfig.zIndex = 1
-        editor1.create();
 
-        var editor2 = new E('#wangeditor22');
-        editor2.customConfig.pasteIgnoreImg = true;
-        editor2.customConfig.pasteFilterStyle = true
-        editor2.customConfig.pasteTextHandle = function (content) {
-            // content 即粘贴过来的内容（html 或 纯文本），可进行自定义处理然后返回
-            if (content == '' && !content) return ''
-            var str = content
-            str = str.replace(/<xml>[\s\S]*?<\/xml>/ig, '')
-            str = str.replace(/<style>[\s\S]*?<\/style>/ig, '')
-            str = str.replace(/<\/?[^>]*>/g, '')
-            str = str.replace(/[ | ]*\n/g, '\n')
-            str = str.replace(/&nbsp;/ig, '')
-            return str
-        }
-        editor2.customConfig.pasteIgnoreImg = true
-        editor2.customConfig.uploadImgServer = '/Tool/FileUpload/'; //设置上传文件的服务器路径
-        editor2.customConfig.uploadImgParams = {
-            uploadtype: 'P',
-            tid: 0
-        }
-        editor2.customConfig.uploadImgMaxSize = 4 * 1024 * 1024; // 将图片大小限制为 3M
-        //自定义上传图片事件
-        editor2.customConfig.uploadImgHooks = {
-            before: function (xhr, editor, files) {
+        });
 
-            },
-            success: function (xhr, editor, result) {
-                var kk = $("#fileid").val();
-                kk = kk == "0" ? result.Fid : kk + "," + result.Fid;
-                $("#fileid").val(kk);
-            },
-            fail: function (xhr, editor, result) {
-                layer.alert('图片插入失败');
-            },
-            error: function (xhr, editor) {
-                layer.alert("上传图片异常！");
-            },
-            timeout: function (xhr, editor) {
-                layer.alert("上传超时！")
+        function isNullOrUndefined(text) {
+            if (text == "" || text == null || text == undefined) { // "",null,undefined
+                return true;
             }
+            return false;
         }
-        editor2.customConfig.zIndex = 1;
-        //custconfig.splice(11, 1);
-        editor2.customConfig.menus = custconfig;
-        editor2.create();
+
+        function initWangEditor(editor) {
+            var custconfig = [
+                'head',  // 标题
+                'bold',  // 粗体
+                'fontSize',  // 字号
+                'fontName',  // 字体
+                'backColor',  // 背景颜色
+                'italic',  // 斜体
+                'underline',  // 下划线
+                'strikeThrough',  // 删除线
+                'foreColor',  // 文字颜色
+                'justify',  // 对齐方式
+                'table', // 表格
+                'image'  // 插入图片
+            ];
+            @*var E = window.wangEditor
+            var editor = new E('#' + divId);*@
+            editor.customConfig.menus = custconfig
+            editor.customConfig.pasteFilterStyle = true
+            editor.customConfig.pasteTextHandle = function (content) {
+                // content 即粘贴过来的内容（html 或 纯文本），可进行自定义处理然后返回
+                if (content == '' && !content) return ''
+                var str = content
+                str = str.replace(/<xml>[\s\S]*?<\/xml>/ig, '')
+                str = str.replace(/<style>[\s\S]*?<\/style>/ig, '')
+                str = str.replace(/<\/?[^>]*>/g, '')
+                str = str.replace(/[ | ]*\n/g, '\n')
+                str = str.replace(/&nbsp;/ig, '')
+                return str
+            }
+            editor.customConfig.pasteIgnoreImg = true
+            editor.customConfig.uploadImgServer = '/Tool/FileUpload/'; //设置上传文件的服务器路径
+            editor.customConfig.uploadImgParams = {
+                uploadtype: 'P',
+                tid: 0
+            }
+            editor.customConfig.uploadImgMaxSize = 4 * 1024 * 1024; // 将图片大小限制为 3M
+            //自定义上传图片事件
+            editor.customConfig.uploadImgHooks = {
+                before: function (xhr, editor, files) {
+
+                },
+                success: function (xhr, editor, result) {
+                    var kk = $("#fileid").val();
+                    kk = kk == "0" ? result.Fid : kk + "," + result.Fid;
+                    $("#fileid").val(kk);
+                },
+                fail: function (xhr, editor, result) {
+                    layer.alert('图片插入失败');
+                },
+                error: function (xhr, editor) {
+                    layer.alert("上传图片异常！");
+                },
+                timeout: function (xhr, editor) {
+                    layer.alert("上传超时！")
+                }
+            }
+            editor.customConfig.zIndex = 1
+            editor.create();
+        }
     </script>
     <script>
         var $ = layui.$;
@@ -467,9 +471,9 @@
                     fileid: $("#fileid").val(),
                     truser: trusers,
                     sugdep: $("#suggestdep").val(),
-                    tusername:$("#submittopic").data("username")
-                        },
-                    success: function (data) {
+                    tusername: $("#submittopic").data("username")
+                },
+                success: function (data) {
                     var resobj = JSON.parse(data);
                     if (resobj.code == "0") {
                         layer.msg(resobj.msg, {
@@ -488,9 +492,6 @@
             });
         })
     </script>
-
-
-
 
     <style type="text/css">
         .toolbar {

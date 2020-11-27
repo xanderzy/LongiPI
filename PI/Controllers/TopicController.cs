@@ -59,6 +59,13 @@ namespace PI.Controllers
         }
 
 
+        public IActionResult detail(int id)
+        {
+            var topic = _topic.GetById(id);
+            string str = JsonConvert.SerializeObject(new { code = 0, msg = "查询成功", data = topic });
+            return Content(str);
+        }
+
         //获取流程数据
         public IActionResult GetStatusLog(int slid)
         {
