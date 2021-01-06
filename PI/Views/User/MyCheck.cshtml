@@ -3,7 +3,7 @@
     ViewData["Title"] = "MyCheck";
 }
 <div class="layui-container fly-marginTop fly-user-main">
-    <ul class="layui-nav layui-nav-tree layui-inline" lay-filter="user"  style="z-index:1">
+    <ul class="layui-nav layui-nav-tree layui-inline" lay-filter="user" style="z-index:1">
         <li class="layui-nav-item">
             <a asp-controller="User" asp-action="MyHome">
                 <i class="layui-icon">&#xe609;</i>
@@ -26,6 +26,12 @@
             <a asp-controller="User" asp-action="MyCheck">
                 <i class="layui-icon">&#xe611;</i>
                 我的审核
+            </a>
+        </li>
+        <li class="layui-nav-item">
+            <a asp-controller="User" asp-action="MyMark">
+                <i class="layui-icon">&#xe6b2;</i>
+                我的打分
             </a>
         </li>
     </ul>

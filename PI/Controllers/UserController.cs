@@ -19,12 +19,18 @@ namespace PI.Controllers
         public UserManager<User> UserManager { get; }
         private readonly DataContext _context;
         private IMarkInfoRepository _markinfo;
-        public UserController(DataContext context, UserManager<User> userManager, ITopicRepository topic, IMarkInfoRepository markinfo)
+        private IReferkeyRepository _referkey;
+        private IStatusLogRepository _statuslog;
+
+
+        public UserController(DataContext context, UserManager<User> userManager, ITopicRepository topic, IMarkInfoRepository markinfo, IReferkeyRepository referkey, IStatusLogRepository statuslog)
         {
             _context = context;
             UserManager = userManager;
             _topic = topic;
             _markinfo = markinfo;
+            _referkey = referkey;
+            _statuslog = statuslog;
         }
         public IActionResult Index()
         {
@@ -119,22 +125,32 @@ namespace PI.Controllers
         public IActionResult GetMarkTopic(int pageIndex, int pageSize)
         {
             var u = UserManager.GetUserAsync(User).Result;
-            var markbylist = (
-                from c in _context.Topics
-                join s in _context.MarkInfos
-                on c.Id equals s.TopicId
-                where c.Type == TopicType.Marking && s.MarkBy == u.UserName&&s.Mark==1001
-                select new
-                {
-                    c.Id,
-                    c.Title,
-                    s.CreateDate,
-                });
-            var mcss = markbylist.OrderBy(r => r.CreateDate).ToList();
-            int count = mcss.Count();
-            var list = mcss.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
-            string str = JsonConvert.SerializeObject(new { total = count, rows = list });
-            return Content(str);
+            bool  duijieren = _referkey.List(r => r.Keys == "teamleader" && r.StrVal1 == u.UserName).Any();
+            if (duijieren)
+            {
+               var markbylist = (
+               from c in _context.Topics
+               join s in _context.Users
+               on c.UserName equals s.UserName
+               where c.Type == TopicType.Top && s.Department==u.Department&&c.TopicMark==0
+               select new
+               {
+                   c.Id,
+                   c.Title,
+                   c.FinishTime,
+               });
+                var mcss = markbylist.OrderBy(r => r.FinishTime).ToList();
+                int count = mcss.Count();
+                var list = mcss.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
+                string str = JsonConvert.SerializeObject(new {code=0,total = count, rows = list });
+                return Content(str);
+            }
+            else
+            {
+                string str = JsonConvert.SerializeObject(new {code=1});
+                return Content(str);
+            }
+            
         }
 
 
@@ -163,6 +179,76 @@ namespace PI.Controllers
             ViewBag.RsReplys = myrforr.Take(10).ToList();
             ViewBag.User = u;
             return View();
+        }
+
+
+        //对接人打分
+        public IActionResult MarkTopic(int maid, int mark, string submark, int marktype)
+        {
+            string exin = "";
+            string ss = "";
+            int[] submarkdefault = new int[] { 0, 0, 0, 0, 0, 0 };
+            if (submark != null)
+            {
+                string[] allmark = submark.Split(",");
+                for (int i = 0; i < 6; i++)
+                {
+                    submarkdefault[i] = Convert.ToInt32(allmark[i]);
+                }
+            }
+            try
+            {
+                var u = UserManager.GetUserAsync(User).Result;
+                //添加分数信息
+                _markinfo.Add(new MarkInfo
+                {
+                    TopicId = maid,
+                    MarkBy = u.UserName,
+                    MarkUserName = u.RealName,
+                    Mark = mark == 0 ? 1 : mark,
+                    CreateDate = DateTime.Now,
+                    MarkDate = DateTime.Now,
+                    MarkType = marktype,
+                    SubMark1 = submarkdefault[0],
+                    SubMark2 = submarkdefault[1],
+                    SubMark3 = submarkdefault[2],
+                    SubMark4 = submarkdefault[3],
+                    SubMark5 = submarkdefault[4],
+                    SubMark6 = submarkdefault[5],
+                }); ;
+                //添加打分日志
+                string logtransname = "FirstMark";
+                int preval = 5;
+                int nowval = mark > 20 ? 5 : 7;
+                _statuslog.Add(new StatusLog
+                {
+                    TopicId = maid,
+                    TransDate = DateTime.Now,
+                    TransBy = u.UserName,
+                    TransName = logtransname,
+                    PreStaus = preval,
+                    NowStatus = nowval,
+                    Attr2 = mark.ToString()
+                });
+
+                var topic = _topic.GetById(maid);
+                topic.LastReplyTime = System.DateTime.Now;
+                if (mark <=20)
+                {
+                    topic.Type = TopicType.Perfect;
+                }
+                topic.TopicMark = mark;
+                _topic.Edit(topic);
+                exin = "评分成功";
+                ss = JsonConvert.SerializeObject(new { success = true, exinfo = exin });
+                return Content(ss);
+            }
+            catch (Exception ex)
+            {
+                exin = ex.ToString();
+                ss = JsonConvert.SerializeObject(new { success = false, exinfo = exin });
+                return Content(ss);
+            }
         }
     }
 }

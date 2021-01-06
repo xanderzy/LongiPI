@@ -231,8 +231,8 @@
 
         //提案的ID
         var ftid = $("#titleid").data("id");
-        var bohuiren=''
-
+        var bohuiren = ''
+ 
 
          var tableIns = table.render({
             elem: '#processlog'
@@ -254,7 +254,9 @@
                          if (d.TransName == "AddNewRUser") { return "添加实施人" }
                            if (d.TransName=="DeleteRuser") { return "删除实施人" }
                           if (d.TransName=="BreakTL") { return "中止提案" }
-                          if (d.TransName=="Chehui") { return "提案撤回" }
+                         if (d.TransName == "Chehui") { return "提案撤回" }
+                         if (d.TransName == "FirstMark") { return "部门对接人评分" }
+
                     }
                  },
                  {
@@ -274,7 +276,8 @@
                              return d.RealName + "发布了提案,现由" + d.Attr2 + "进行审核"
                          }
                           if (d.TransName== "PassTL") { return d.RealName+"审核通过提案，添加了实施人:"+d.Attr2}
-                          if (d.TransName=="FinishTopic") { return d.RealName+"完结了提案" }
+                         if (d.TransName == "FinishTopic") { return d.RealName + "完结了提案" }
+                         if (d.TransName == "FirstMark") { return "此提案部门对接人评分为:" + d.Attr2 }
                           if (d.TransName=="JiMark") { return "此提案基地评分为:" +d.Attr2}
                           if (d.TransName=="ZonbugMark") { return "此提案基地评分为"+d.Attr2}
                           if (d.TransName == "BohuiMark") { return "此提案被总部驳回，基地重新评分为:" + d.Attr2 }
@@ -283,6 +286,7 @@
                              $("#shenheren").html('审核中:'+bohuiren)
                              return d.RealName + "将提案转办给了" + d.Attr2
                          }
+
                           if (d.TransName=="HideTopic") { return bohuiren+"驳回了提案,驳回理由:"+d.Attr2}
                           if (d.TransName == "AddNewRUser") { return d.RealName + "添加了新的实施人:" + d.Attr2 }
                           if (d.TransName=="DeleteRuser") { return d.RealName + "删除了实施人:" + d.Attr2 }

@@ -82,16 +82,20 @@
                         "pageSize": limit,
                     },
                     success: function (ret) {
-                        total = ret.total;  //设置总条数
-                        var data1 = ret.rows;
-                        var html = '';
-                        for (var i = 0; i < data1.length; i++) {
-                            html += '<li>';
-                            html += '<a href="../Topic/MarkByLeader/' + data1[i].Id + '">' + data1[i].Title + '</a>';
-                            html += '<i>派发于' + TimeFormat(data1[i].CreateDate) + '</i>';
-                            html += '</li>'
+                        if (ret.code == 0) {
+                            total = ret.total;  //设置总条数
+                            var data1 = ret.rows;
+                            var html = '';
+                            for (var i = 0; i < data1.length; i++) {
+                                html += '<li>';
+                                html += '<a href="../Topic/FirstMark/' + data1[i].Id + '">' + data1[i].Title + '</a>';
+                                html += '<i>完结于' + TimeFormat(data1[i].FinishTime) + '</i>';
+                                html += '</li>'
+                            }
+                            $("#mymark").empty().append(html);
+                        } else {
+                            return false
                         }
-                        $("#mymark").empty().append(html);
                     }
                 });
             }

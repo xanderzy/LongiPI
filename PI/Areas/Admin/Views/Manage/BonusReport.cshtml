@@ -29,7 +29,11 @@
     </div>
 
     <table id="bonusreport" lay-filter="bonusreport"></table>
- 
+    <script type="text/html" id="jdmarkbar">
+        <a class="layui-btn layui-btn-xs" lay-event="backtomark">重新评分</a>
+        
+    </script>
+
 </div>
 @section Scripts{
     <script>
@@ -48,16 +52,16 @@
                     , url: '/Admin/Manage/GetBonusReport' //数据接口
                     , page: true //开启分页
                     , limit: 10 //每页显示行数
-                    , id: 'bonusreportid'
+                    , id: 'bonusreport'
                     , loading: true
                     , toolbar: true //导出打印工具栏
                     , limits: [10,50,100, 200, 300,500]
                     , toolbar: true
                     , cols: [[ //表头
-                           { field: 'Title', title: '提案名称', width: '24%' }
-                        , { field: 'FinishTime', title: '完结时间', width: '13%',templet: function (d) { return TimeFormat(d.FinishTime) }}
+                           { field: 'Title', title: '提案名称', width: '20%' }
+                        , { field: 'FinishTime', title: '完结时间', width: '10%',templet: function (d) { return TimeFormat(d.FinishTime) }}
                         , {
-                            field: 'TransDate', title: '打分时间', width: '13%',templet: function (d) { return TimeFormat(d.TransDate) }
+                            field: 'TransDate', title: '打分时间', width: '10%',templet: function (d) { return TimeFormat(d.TransDate) }
                         }
                         , { field: 'Mark', title: '提案得分', width: '8%' }
                         , { field: 'UserName', title: '工号', width: '8%' }
@@ -72,11 +76,14 @@
                         }
                         , {
                             field: 'Ratio', title: '分配比例', width: '8%',templet: function (d) {
-                                 return d.Ratio+"%"
+                                 return d.Ratio.toFixed(2)+"%"
                             }
                             
                         }
                         , { field: 'Amount', title: '奖金', width: '8%', }
+                        , {title:'操作',width:'10%',toolbar:'#jdmarkbar'}
+
+
                     ]]
                 });
 
@@ -94,7 +101,44 @@
                     });
                 });
 
-                 function TimeFormat(nfmtime) {
+        table.on('tool(bonusreport)', function (obj) {
+            if (obj.event === 'backtomark') {
+                var tid = obj.data.TopicId;
+                 layer.confirm('确认要重新打分么？', {
+                    btn: ['确定', '取消'] 
+                }, function (index) {
+                    layer.close(index);
+                        $.ajax({
+                            url: "/Admin/Manage/BackToMark ",
+                            type:'POST',
+                            data: { tid: tid },
+                            success: function (data) {
+                                var re = JSON.parse(data);
+                                 if (!re.success) {
+                                    layer.msg(re.msg, {
+                                        time: 2000
+                                    });
+                                } else {
+                                    layer.close(index);
+                                     layer.msg(re.msg, {
+                                        time: 1000
+                                    });
+                                    tableIns.reload({
+                                        page: {
+                                            curr: 1
+                                        }
+                                    });
+                                }
+                            }
+                        })
+                   
+                }, function (index) {
+                    layer.close(index);
+                });
+            }
+        })
+
+          function TimeFormat(nfmtime) {
                 if (nfmtime == null || nfmtime == "" || nfmtime == undefined) {
                     return "无";
                 } else {

@@ -591,9 +591,20 @@ namespace PI.Controllers
                 return Content(ss);
             }
         }
+        //部门对接人打分页面信息显示
+        public IActionResult FirstMark(int id)
+        {
+            if (id <= 0) return Redirect("/");
+            var marktopicdetail = _topic.GetById(id);
+            if (marktopicdetail == null) return Redirect("/");
+             var mffiles = _myfile.List(r => r.TopicId == id && r.FileIcon == "F").ToList();
+            var mwfiles = _myfile.List(r => r.TopicId == id && r.FileIcon == "W").ToList();
+            ViewBag.MFFiles = mffiles;
+            ViewBag.MWFiles = mwfiles;
+             return View(marktopicdetail);
+        }
 
 
-        
         //打分页面信息显示
         public IActionResult MarkByLeader(int id)
         {

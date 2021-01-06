@@ -78,16 +78,17 @@
         </ul>
         <div class="fly-column-right layui-hide-xs">
             <form asp-controller="Home" asp-action="Index" method="get" class="fly-extend-banner-search">
-                <div class="layui-inline">
-                    <input placeholder="请输入关键字" name="topicname" autocomplete="off" value="" class="layui-input">
-                </div>
-                <button class="layui-btn lay-submit">
-                    <i class="layui-icon layui-icon-search"></i>
-                </button>
+
                 @if (SignInManager.IsSignedIn(User))
                 {
                     @if (@ViewContext.RouteData.Values["Controller"].ToString() != "Topic" && @ViewContext.RouteData.Values["Action"].ToString() != "AddTopic")
-                    { 
+                    {
+                        <div class="layui-inline">
+                            <input placeholder="请输入关键字" name="topicname" autocomplete="off" value="" class="layui-input">
+                        </div>
+                        <button class="layui-btn lay-submit">
+                            <i class="layui-icon layui-icon-search"></i>
+                        </button>
                         <a asp-controller="Home" asp-action="AddTopic" class="layui-btn">发布提案</a>
                     }
                 }

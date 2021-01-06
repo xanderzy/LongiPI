@@ -63,6 +63,15 @@
                     </select>
                 </div>
             </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">角色</label>
+                <div class="layui-input-block">
+                    <select name="Role" class="layui-input" lay-verify="required">
+                        <option value="" selected></option>
+                        <option value="pingfen" selected>评分人员</option>
+                    </select>
+                </div>
+            </div>
             <div class="layui-form-item" style="margin-top:10px">
                 <label class="layui-form-label"></label>
                 <div class="layui-input-block">
@@ -71,10 +80,11 @@
             </div>
         </div>
     </div>
-<script type="text/html" id="userrbar">
-    <a class="layui-btn layui-btn-xs" lay-event="edituser">编辑</a>
-    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="resetpass">重置密码</a>
-</script>
+    <script type="text/html" id="userrbar">
+        <a class="layui-btn layui-btn-xs" lay-event="edituser">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="resetpass">重置密码</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="userlogout">注销</a>
+    </script>
 </div>
 
 
@@ -144,6 +154,10 @@
             active[type] ? active[type].call(this) : '';
         })
 
+        function getRoleValue() {
+
+        }
+
         //单元格编辑框  tool
         table.on('tool(lay-admin-edit)', function (obj) {
             var layer = layui.layer;
@@ -154,7 +168,18 @@
                 $.ajax({
                     type: "post",
                     url: "/Admin/AdminUser/ResetPassword",//对应controller的URL
-                    data: { username: data.UserName },
+                    data: { username: data.UserName, newpass: '123456' },
+                    success: function (res) {
+                        var resobj = JSON.parse(res);
+                        layer.alert(resobj.msg);
+                    }
+                })
+            } else if (obj.event === 'resetpass') {
+                //注销-将密码修改为8008208820
+                $.ajax({
+                    type: "post",
+                    url: "/Admin/AdminUser/ResetPassword",//对应controller的URL
+                    data: { username: data.UserName,newpass:'8008208820' },
                     success: function (res) {
                         var resobj = JSON.parse(res);
                         layer.alert(resobj.msg);

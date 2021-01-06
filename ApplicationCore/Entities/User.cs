@@ -18,5 +18,5 @@ namespace ApplicationCore.Entities
         public DateTime CreateOn { get; set; }
         public DateTime LastTime { get; set; }
 
-    }
+     }
 }

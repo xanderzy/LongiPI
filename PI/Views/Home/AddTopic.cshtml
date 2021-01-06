@@ -275,7 +275,7 @@
 
         var fileisexist = []
         var isfileuploaded = "N"
-        //文件上传
+         //文件上传
         upload.render({
             elem: '#uploadfile'
             , url: '/Tool/FileUpload'
@@ -366,9 +366,18 @@
                     layer.alert("未实施状态提案不能添加实施人！")
                     return false;
                 }
+              
                 var tableObj = tableIns;
                 var config = tableObj.config;
                 var dataTemp = config.data;
+                console.log(dataTemp)
+                let userrep = dataTemp.some((value) => {
+                    return value.realname === suv
+                })
+                if (userrep) {
+                    layer.alert("重复添加实施人！")
+                    return false;
+                }
 
                 //获取接口数据
                 $.ajax({

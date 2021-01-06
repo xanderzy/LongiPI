@@ -104,13 +104,12 @@ namespace PI.Areas.Admin.Controllers
         }
 
         //密码重置
-        public async Task<IActionResult> ResetPassword(string username)
+        public async Task<IActionResult> ResetPassword(string username,string newpass)
         {
             if (!string.IsNullOrEmpty(username))
             {
                 var u = UserManager.FindByNameAsync(username).Result;
-                string password = "123456";
-                u.PasswordHash = UserManager.PasswordHasher.HashPassword(u, password);
+                 u.PasswordHash = UserManager.PasswordHasher.HashPassword(u, newpass);
                 IdentityResult result = await UserManager.UpdateAsync(u);
                 string str = JsonConvert.SerializeObject(new { code = 0, msg = "重置成功" });
                 return Content(str);

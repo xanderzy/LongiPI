@@ -206,8 +206,32 @@ namespace PI.Areas.Admin.Controllers
             }
         }
 
-
-
+         public IActionResult BackToMark(int tid)
+        {
+            string str = "";
+            try
+            {
+                var delbonus = _bonus.List().Where(r => r.TopicId == tid).ToList();
+                _context.Bonuss.RemoveRange(delbonus);
+                _context.SaveChanges();
+                //删除打分的statsu
+                var delstatus = _statuslog.List().Where(r => r.TopicId == tid&&(r.TransName=="JiMark"||r.TransName== "BohuiMark")).ToList();
+                _context.StatusLogs.RemoveRange(delstatus);
+                _context.SaveChanges();
+                var topics = _topic.GetById(tid);
+                topics.Type = TopicType.Top;
+                topics.TopicMark = 0;
+                topics.ZongbuMark = 0;
+                 _topic.Edit(topics);
+                str= JsonConvert.SerializeObject(new { success = true, msg = "驳回成功" });
+                return Content(str);
+            }
+            catch(Exception ex)
+            {
+                str = JsonConvert.SerializeObject(new { success = false, msg = ex.ToString() });
+                return Content(str);
+            }
+        }
 
 
         //驳回页面
@@ -442,7 +466,7 @@ namespace PI.Areas.Admin.Controllers
         {
             return View();
         }
-
+ 
         //获取奖金报表页面
         public IActionResult GetBonusReport(int page, int limit,string title,string starttime,string endtime)
         {
@@ -472,19 +496,19 @@ namespace PI.Areas.Admin.Controllers
             return View();
         }
 
-        //基地打分页面
+        //基地评分页面
         public IActionResult JidiMark()
         {
             return View();
         }
 
-        //获取基地打分列表
+        //获取基地评分列表
         public IActionResult GetJiDiMarkRpt(int page, int limit,string title)
         {
             var result = from a in _context.Topics
                          join b in _context.Users
                          on a.UserName equals b.UserName
-                         where a.Type == TopicType.Top
+                         where a.Type == TopicType.Top&&a.TopicMark>0
                          orderby a.FinishTime  
                          select new
                          {
@@ -732,8 +756,9 @@ namespace PI.Areas.Admin.Controllers
                 //判断是否是基地打分
                 if (topic.Type == TopicType.Top)
                 {
-                    topic.TopicMark = mark;
-                    if (mark >= 61)
+                    int newmark = (topic.TopicMark + mark) / 2;
+                    topic.TopicMark = newmark;
+                    if (newmark >= 61)
                     {
                         //发送邮件走总部流程
                         MailBox mymail = new MailBox();
@@ -806,26 +831,26 @@ namespace PI.Areas.Admin.Controllers
 
                         double sumprice = 0.00;
 
-                        if (mark >=0 && mark <= 9)
+                        if (newmark >=0 && newmark <= 9)
                         {
                             sumprice = 0.00;
-                        }else if (mark >= 10 && mark <= 20)
+                        }else if (newmark >= 10 && newmark <= 20)
                         {
                             sumprice = 10.00;
                         }
-                        else if (mark >= 21 && mark <=30)
+                        else if (newmark >= 21 && newmark <= 30)
                         {
                             sumprice = 30.00;
                         }
-                        else if (mark >= 31 && mark <= 40)
+                        else if (newmark >= 31 && newmark <= 40)
                         {
                             sumprice = 50.00;
                         }
-                        else if (mark >= 41 && mark <= 50)
+                        else if (newmark >= 41 && newmark <= 50)
                         {
                             sumprice = 100.00;
                         }
-                        else if (mark >= 51 && mark <= 60)
+                        else if (newmark >= 51 && newmark <= 60)
                         {
                             sumprice = 200.00;
                         }
@@ -848,7 +873,7 @@ namespace PI.Areas.Admin.Controllers
                                     TransDate = DateTime.Now,
                                     TopicId = topic.Id,
                                     Title = topic.Title,
-                                    Mark = mark,
+                                    Mark = newmark,
                                     UserName = replyerlist[i].ReplyUserName,
                                     RealName = replyerlist[i].RealName,
                                     Role = 2,
@@ -864,7 +889,7 @@ namespace PI.Areas.Admin.Controllers
                             TransDate = DateTime.Now,
                             TopicId = topic.Id,
                             Title = topic.Title,
-                            Mark = mark,
+                            Mark = newmark,
                             UserName = topic.UserName,
                             RealName = topic.User.RealName,
                             Role = roleval,
