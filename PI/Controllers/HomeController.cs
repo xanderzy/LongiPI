@@ -271,11 +271,9 @@ namespace PI.Controllers
             }
         }*/
 
-
-
-
-        public IActionResult AddTopic()
+        public IActionResult AddTopic(int id)
         {
+            ViewBag.TopicId = id;
             return View();
         } 
 

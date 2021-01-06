@@ -32,6 +32,14 @@ namespace PI
                     options.Listen(IPAddress.Parse("10.12.0.154"), 80, listenOptions => { });*/
                  options.Listen(IPAddress.Loopback, 5001, listenOptions => { });
                 //options.Listen(IPAddress.Parse("10.6.6.193"), 80, listenOptions => { });
+                  //options.Listen(IPAddress.Parse("10.6.6.199"), 9515, listenOptions =>
+                   //      {
+                   //          listenOptions.UseHttps("C:\\daochuzhengshu\\longicertificate.cer", "gIkGMrkF");        
+                   //      }
+                  //      );
+                   //options.Listen(IPAddress.Parse("10.6.6.199"), 80, listenOptions => { });
+               options.Listen(IPAddress.Loopback, 5001, listenOptions => { });
+                // options.Listen(IPAddress.Parse("10.6.6.193"), 80, listenOptions => { });
                })
                 .Build();
             var provider = host.Services;

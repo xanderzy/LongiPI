@@ -124,7 +124,7 @@
                                     if (data1[i].Type == 6) { typehtml = '<span class="layui-badge layui-bg-green">已完结</span>'; }
                                      if (data1[i].Type == 11) { typehtml = '<span class="layui-badge layui-bg-black">已中止</span>'; }
                                     if (data1[i].Type == 0) {
-                                        typehtml = '<span class="layui-badge layui-bg-black">已驳回</span><a href="javascript:void(0)" onclick="subgo(' + data1[i].Id + ')"><i class="layui-icon layui-icon-delete" style="font-size: 30px; color: #1E9FFF;"></i></a>'; }
+                                        typehtml = '<span class="layui-badge layui-bg-black">已驳回</span><a href="javascript:void(0)" onclick="subgo(' + data1[i].Id + ')"><i class="layui-icon layui-icon-delete" style="font-size: 30px; color: #1E9FFF;"></i></a><a href="javascript:void(0)" onclick="_edit(' + data1[i].Id + ')"><i class="layui-icon layui-icon-edit" style="font-size: 30px; color: #1E9FFF;"></i></a>'; }
                                     html += '<li>';
                                     html += '<a href="../Topic/Index/' + data1[i].Id + '">' + data1[i].Title + '</a>';
                                     html += typehtml;
@@ -138,7 +138,11 @@
                     });
         }
 
-         
+
+        function _edit(id) {
+            //跳转到编辑页面
+            window.location = "../Home/AddTopic/" + id
+        }
 
         //删除按钮
         function subgo(deid) {

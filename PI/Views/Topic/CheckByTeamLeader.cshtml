@@ -231,7 +231,7 @@
                 layer.alert("转办提案不得添加实施人，请删除实施人");
                 return;
             } else {
-                layer.prompt({
+                @*layer.prompt({
                     formType: 0,
                     value: '',
                     title: '请输入转办人员姓名',
@@ -272,9 +272,8 @@
                                 }
                             }
                         })
-              })
-                
-                /*layer.confirm('提案转办会自动转入管理员审核，确认要转办提案么？', {
+              })*@   
+              layer.confirm('提案转办会自动转入管理员审核，确认要转办提案么？', {
                     btn: ['确定', '取消'] //按钮
                 }, function () {
                     var zbtid = $("#changetl").data("id");
@@ -298,7 +297,7 @@
                     })
                 }, function () {
                     layer.close()
-                });*/
+                });
             }
         })
 
